@@ -53,7 +53,7 @@ void (float zoom_in) Sniper_ZoomAdjust;
 void () TeamFortress_StatusQuery;
 void () CF_Scout_Dash;
 void () CF_Spy_DisguiseStop;
-void () TeamFortress_DetpackMenu;
+void (float noupdate) TeamFortress_DetpackMenu;
 void () CF_Medic_AuraToggle;
 void () TeamFortress_EngineerBuild;
 void () TeamFortress_EngineerBuildStop;
@@ -1677,7 +1677,7 @@ void (entity pl) W_SetCurrentAmmo = {
 
     // refresh engineer build menu when ammo updated
     if (pl.menu_input == Menu_Engineer_Input)
-        Menu_Engineer(pl);
+        Menu_Engineer(pl, FALSE);
     else if (pl.menu_input == Menu_Drop_Input) {
         oldself = self;
         self = pl;
@@ -3025,7 +3025,7 @@ void () ImpulseCommands = {
         CF_Spy_DisguiseLast();
     else if ((self.impulse == TF_DEMOMAN_DETPACK) &&
              (self.playerclass == PC_DEMOMAN))
-        TeamFortress_DetpackMenu();
+        TeamFortress_DetpackMenu(FALSE);
     else if ((self.impulse == TF_ENGINEER_BUILD) &&
              (self.playerclass == PC_ENGINEER))
         TeamFortress_EngineerBuild();
@@ -3222,13 +3222,13 @@ void () W_WeaponFrame = {
 
     if (self.impulse == TF_CLASSMENU && self.playerclass != PC_MEDIC) {
         if (self.playerclass == PC_ENGINEER)
-            Menu_Engineer(self);
+            Menu_Engineer(self, FALSE);
         else if (self.playerclass == PC_SCOUT)
-            Menu_Scout();
+            Menu_Scout(FALSE);
         else if (self.playerclass == PC_SPY)
-            Menu_Spy(self);
+            Menu_Spy(self, FALSE);
         else if (self.playerclass == PC_DEMOMAN)
-            TeamFortress_DetpackMenu();
+            TeamFortress_DetpackMenu(FALSE);
 
         self.impulse = 0;
         return;

@@ -16,7 +16,7 @@ void (entity disp) Engineer_SentryGun_ShowMenu;
 void (entity disp) Engineer_SentryGun_InsertAmmo;
 void (entity disp) Engineer_SentryGun_Upgrade;
 void (entity disp) Engineer_SentryGun_Repair;
-void () Menu_Engineer_Cancel;
+void (float noupdate) Menu_Engineer_Cancel;
 void () CF_CheckBuilding;
 float (entity obj, entity builder) CheckArea;
 
@@ -327,7 +327,7 @@ void () TeamFortress_EngineerBuild = {
             Status_Print(self, "\n\n\n\n\n\n\n", "Not enough metal to build anything");
             return;
         }
-        Menu_Engineer(self);
+        Menu_Engineer(self, FALSE);
     } else if (self.is_building == 1) {
         TeamFortress_EngineerBuildStop();
     }
@@ -514,7 +514,7 @@ void (float objtobuild) TeamFortress_Build = {
     self.weaponframe = 0;
     TeamFortress_SetSpeed(self);
     Status_Refresh(self);
-    Menu_Engineer_Cancel();
+    Menu_Engineer_Cancel(FALSE);
 
     newmis.owner = self;
     newmis.classname = "timer";

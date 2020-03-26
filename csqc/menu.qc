@@ -27,6 +27,7 @@ void (float force) FO_Menu_Spy_Skin;
 void (float force) FO_Menu_Spy_Team;
 void (float force) FO_Menu_Class;
 void FO_Menu_Admin_Players(float force, float type, float page);
+void FO_Menu_Detpack(float cancel_detpack, float force);
 
 typedef struct {
     string shortcut;    //key to press. if omitted - mouse only
@@ -243,10 +244,10 @@ var fo_menu FO_MENU_SPY_TEAM = {
 };
 var fo_menu FO_MENU_DETPACK = {
     [0,0], [300,200], "Set detpack for", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
-        {"1","5 Seconds","","",FO_MENU_STATE_NORMAL,{localcmd("cmd detpack 5\n");Menu_Cancel();},MENU_BUTTON},
-        {"2","20 Seconds","","",FO_MENU_STATE_NORMAL,{localcmd("cmd detpack 20\n");Menu_Cancel();},MENU_BUTTON},
-        {"3","50 Seconds","","",FO_MENU_STATE_NORMAL,{localcmd("cmd detpack 50\n");Menu_Cancel();},MENU_BUTTON},
-        {"4","255 Seconds","","",FO_MENU_STATE_NORMAL,{localcmd("cmd detpack 255\n");Menu_Cancel();},MENU_BUTTON},
+        {"1","5 Seconds","","",FO_MENU_STATE_NORMAL,{print("MEHT Calling cancel\n");FO_Menu_Detpack(TRUE,TRUE);localcmd("cmd detpack 5\n");},MENU_BUTTON},
+        {"2","20 Seconds","","",FO_MENU_STATE_NORMAL,{FO_Menu_Detpack(TRUE,TRUE);localcmd("cmd detpack 20\n");},MENU_BUTTON},
+        {"3","50 Seconds","","",FO_MENU_STATE_NORMAL,{FO_Menu_Detpack(TRUE,TRUE);localcmd("cmd detpack 50\n");},MENU_BUTTON},
+        {"4","255 Seconds","","",FO_MENU_STATE_NORMAL,{FO_Menu_Detpack(TRUE,TRUE);localcmd("cmd detpack 255\n");},MENU_BUTTON},
         MenuSpacer,
         {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
     }, 6, TRUE
@@ -1003,6 +1004,8 @@ void FO_Menu_DropAmmo(float force, float ammotypes, float ammomakes) {
 }
 
 void FO_Menu_Scout(float force, float scanner_on, float scanner_flags) = {
+    if(CurrentMenu == &FO_MENU_SCOUT && force == 3)
+        return;
     if(fo_hud_menu_active && CurrentMenu == &FO_MENU_SCOUT && force != 2) {
         Menu_Cancel();
         return;
@@ -1017,6 +1020,8 @@ void FO_Menu_Scout(float force, float scanner_on, float scanner_flags) = {
     fo_hud_menu_active = TRUE;
 }
 void FO_Menu_Spy(float force) = {
+    if(CurrentMenu == &FO_MENU_SPY && force == 3)
+        return;
     if(fo_hud_menu_active && CurrentMenu == &FO_MENU_SPY && force != 2) {
         Menu_Cancel();
         return;
@@ -1081,22 +1086,39 @@ void FO_Menu_Spy_Skin(float force) = {
     CurrentMenu = &FO_MENU_SPY_SKIN;
     fo_hud_menu_active = TRUE;
 }
-void FO_Menu_Detpack(float force, float cancel_detpack) = {
-    if(fo_hud_menu_active && (CurrentMenu == &FO_MENU_DETPACK_CANCEL || CurrentMenu == &FO_MENU_DETPACK) && force != 2) {
-        Menu_Cancel();
+void FO_Menu_Detpack(float cancel_detpack, float force) = {
+    print("MEHT: FO_Menu_Detpack: ", ftos(force), ", ", ftos(cancel_detpack),"\n");
+    if(fo_hud_menu_active && force != 1) {
+        print("MEHT: FO_Menu_Detpack: returning 1\n");
         return;
     }
-    if(fo_hud_menu_active && force != 1)
+    if((CurrentMenu == &FO_MENU_DETPACK_CANCEL || CurrentMenu == &FO_MENU_DETPACK) && force == 3) {
+        print("MEHT: FO_Menu_Detpack: returning 2\n");
         return;
-    if(cancel_detpack) {
-        CurrentMenu = &FO_MENU_DETPACK_CANCEL;
+    }
+    if(cancel_detpack || SBAR.IsDetpacking) {
+        if(fo_hud_menu_active && (CurrentMenu == &FO_MENU_DETPACK_CANCEL) && force != 2) {
+            Menu_Cancel();
+            print("MEHT: FO_Menu_Detpack: returning 3\n");
+            return;
+        }        CurrentMenu = &FO_MENU_DETPACK_CANCEL;
+        print("MEHT: FO_Menu_Detpack: setting cancel\n");
     } else {
+        if(fo_hud_menu_active && (CurrentMenu == &FO_MENU_DETPACK) && force != 2) {
+            Menu_Cancel();
+            print("MEHT: FO_Menu_Detpack: returning 4\n");
+            return;
+        }
+        print("MEHT: FO_Menu_Detpack: setting normal\n");
         CurrentMenu = &FO_MENU_DETPACK;
     }
     fo_hud_menu_active = TRUE;
+    print("MEHT: FO_Menu_Detpack: finished\n");
 }
 void FO_Menu_Build(float force) = {
-    if(fo_hud_menu_active && (CurrentMenu == &FO_MENU_BUILD_CANCEL || CurrentMenu == &FO_MENU_BUILD) && force != 2) {
+    if((CurrentMenu == &FO_MENU_BUILD_CANCEL || CurrentMenu == &FO_MENU_BUILD) && force == 3)
+        return;
+    if(fo_hud_menu_active && (CurrentMenu == &FO_MENU_BUILD) && force != 2) {
         Menu_Cancel();
         return;
     }
@@ -1278,7 +1300,7 @@ void FO_Menu_Special(float force) = {
             FO_Menu_Scout(force, FALSE, FALSE); //TODO: fix scanner settings
             break;
         case PC_DEMOMAN:
-            FO_Menu_Detpack(force, FALSE); //TODO: fix cancel
+            FO_Menu_Detpack(FALSE, force); //TODO: fix cancel
             break;
         case PC_SPY:
             FO_Menu_Spy(force);
@@ -1290,6 +1312,6 @@ void FO_Menu_Special(float force) = {
             //no class menu
             return;
     }
-    localcmd("cmd menu\n");
+    localcmd("cmd menu noupdate\n");
     //fo_hud_menu_active = TRUE;
 };

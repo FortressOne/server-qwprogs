@@ -279,7 +279,7 @@ void (entity cap, float pick) CaptainPick = {
 float (string arg1, string arg2, string arg3) ParseCmds = {
     local float arg_num, processedCmd, inp;
     local string tmp;
-    local float farg3;
+    local float farg2,farg3;
     local entity ent;
     processedCmd = FALSE;
     
@@ -483,22 +483,23 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 sprint(self, PRINT_HIGH, "Menus are for the living!\n");
                 break;
             }
+            farg2 = (arg2 == "noupdate");
             switch(self.playerclass) {
                 case PC_SCOUT:
-                    Menu_Scout();
+                    Menu_Scout(farg2);
                     break;
                 case PC_DEMOMAN:
                     if(self.is_detpacking) {
-                        Menu_Demoman_Cancel();
+                        Menu_Demoman_Cancel(farg2);
                         break;
                     }
-                    Menu_Demoman();
+                    Menu_Demoman(farg2);
                     break;
                 case PC_SPY:
-                    Menu_Spy(self);
+                    Menu_Spy(self, farg2);
                     break;
                 case PC_ENGINEER:
-                    Menu_Engineer(self);
+                    Menu_Engineer(self, farg2);
                     break;
                 default:
                     sprint(self, PRINT_HIGH, "This class doesn't have a menu.\n");
@@ -587,17 +588,17 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     break;
                 }
                 if(self.is_detpacking) {
-                    Menu_Demoman_Cancel();
+                    Menu_Demoman_Cancel(FALSE);
                     break;
                 }
-                local float farg2 = stof(arg2);
+                farg2 = stof(arg2);
                 if(farg2) {
                     TeamFortress_SetDetpack(farg2);
                     break;
                 }
                 sprint(self, PRINT_HIGH, "Invalid choice. Please use integer values 5+.\n");
             } else {
-                Menu_Demoman();
+                Menu_Demoman(FALSE);
             }
             break;
         case "build":
@@ -635,7 +636,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 }
                 sprint(self, PRINT_HIGH, "Invalid choice.\n");
             } else {
-                Menu_Engineer(self);
+                Menu_Engineer(self, FALSE);
             }
             break;
         case "sentry":

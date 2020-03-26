@@ -3,7 +3,7 @@ void AddGrenTimer(float grentype);
 
 void() CSQC_Parse_Event = {
     float msgtype = readbyte();
-    local float goalno; 
+    local float goalno, noupdate; 
     switch (msgtype) {
         case MSG_FLAGINFOINIT:
             float index = readfloat();
@@ -136,13 +136,14 @@ void() CSQC_Parse_Event = {
                     float scanner_on = readbyte();
                     float scanner_flags = readfloat();
                     
-                    FO_Menu_Scout(2, scanner_on, scanner_flags);
+                    FO_Menu_Scout(2 + readbyte(), scanner_on, scanner_flags);
                     break;
                 case CLIENT_MENU_SPY:
                     SBAR.InvisOnly = readfloat();
                     last_skin = readfloat();
                     last_team = readfloat();
-                    FO_Menu_Spy(2);
+                    
+                    FO_Menu_Spy(2 + readbyte());
                     break;
                 case CLIENT_MENU_SPY_SKIN:
                     FO_Menu_Spy_Skin(2);
@@ -151,10 +152,10 @@ void() CSQC_Parse_Event = {
                     FO_Menu_Spy_Team(FALSE);
                     break;
                 case CLIENT_MENU_DETPACK:
-                    FO_Menu_Detpack(2, readbyte());
+                    FO_Menu_Detpack(readbyte(), 2 + readbyte());
                     break;
                 case CLIENT_MENU_BUILD:
-                    FO_Menu_Build(2);
+                    FO_Menu_Build(2 + readbyte());
                     break;
                 case CLIENT_MENU_ROTATE_SENTRY:
                     FO_Menu_Rotate_Sentry(FALSE);

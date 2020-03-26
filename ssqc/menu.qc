@@ -43,7 +43,7 @@ void (entity disp) Engineer_Dispenser_Repair;
 void (entity disp) Engineer_SentryGun_InsertAmmo;
 void (entity disp) Engineer_SentryGun_Upgrade;
 void (entity disp) Engineer_SentryGun_Repair;
-void () Menu_Engineer_Cancel;
+void (float noupdate) Menu_Engineer_Cancel;
 void () TeamFortress_EngineerBuildStop;
 
 void (entity targ, entity inflictor, entity attacker, float damage,
@@ -61,8 +61,8 @@ void (float update) Menu_Class;
 string (float pc, float tno) TeamFortress_ClassGetNoPlayersString;
 void () Menu_Drop;
 void () PlayerObserverMode;
-void () Menu_Scout;
-void (entity pe_player) Menu_Spy;
+void (float noupdate) Menu_Scout;
+void (entity pe_player, float noupdate) Menu_Spy;
 void () Menu_Spy_Skin;
 void () Menu_Spy_Color;
 
@@ -72,13 +72,13 @@ void (float inp) Menu_Spy_Skin_Input;
 void (float inp) Menu_Spy_Color_Input;
 void () CF_Spy_DisguiseLast;
 
-void () Menu_Demoman;
-void () Menu_Demoman_Cancel;
+void (float noupdate) Menu_Demoman;
+void (float noupdate) Menu_Demoman_Cancel;
 
 void (float inp) Menu_Demoman_Input;
 void (float inp) Menu_Demoman_Cancel_Input;
 
-void (entity player) Menu_Engineer;
+void (entity player, float noupdate) Menu_Engineer;
 void () Menu_Engineer_Update;
 void () Menu_EngineerFix_Dispenser;
 void () Menu_EngineerFix_SentryGun;
@@ -108,12 +108,12 @@ void (entity pl) UpdateClientMenu_Team;
 void (entity pl, float team) UpdateClientClasses;
 void (entity pl) UpdateClientMenu_Class;
 void (entity pl, float ammotypes, float ammomakes) UpdateClientMenu_DropAmmo;
-void (entity pl) UpdateClientMenu_Scout;
-void (entity pl) UpdateClientMenu_Spy;
+void (entity pl, float noupdate) UpdateClientMenu_Scout;
+void (entity pl, float noupdate) UpdateClientMenu_Spy;
 void (entity pl) UpdateClientMenu_Spy_Skin;
 void (entity pl) UpdateClientMenu_Spy_Team;
-void (entity pl, float cancel_detpack) UpdateClientMenu_Detpack;
-void (entity pl) UpdateClientMenu_Build;
+void (entity pl, float cancel_detpack, float noupdate) UpdateClientMenu_Detpack;
+void (entity pl, float noupdate) UpdateClientMenu_Build;
 void (entity pl) UpdateClientMenu_FixSentry;
 void (entity pl) UpdateClientMenu_FixDispenser;
 void (entity pl, entity disp) UpdateClientMenu_UseDispenser;
@@ -526,7 +526,7 @@ void (float inp) Menu_Scout_Input = {
         self.impulse = 0;
 };
 
-void () Menu_Scout = {
+void (float noupdate) Menu_Scout = {
     local string s_action  = "Scanner settings:\n\n";
     local string s_scan, s_scane, s_scanf, s_scansound;
     local string s_nothing = Q"\n\s[5]\s Nothing                   \n\n";
@@ -535,7 +535,7 @@ void () Menu_Scout = {
         //fte+csqc has its own team menu
         //ask the client to activate it
         Menu_Close(self);
-        UpdateClientMenu_Scout(self);
+        UpdateClientMenu_Scout(self, noupdate);
         return;
     }
     
@@ -586,14 +586,14 @@ void (float inp) Menu_Spy_Input = {
     } else if (inp == 3) {
         CF_Spy_FeignDeath(1);
         if (self.is_feigning) {
-            Menu_Spy(self);
+            Menu_Spy(self, FALSE);
         }
     } else if (inp == 4) {
         Spy_RemoveDisguise(self);
     }
 };
 
-void (entity pe_player) Menu_Spy = {
+void (entity pe_player, float noupdate) Menu_Spy = {
     local string s_action  = "Action:\n\n";
     local string s_skin    = Q"\s[1]\s Disguise               \n";
     local string s_last    = Q"\s[2]\s Last disguise          \n";
@@ -607,7 +607,7 @@ void (entity pe_player) Menu_Spy = {
         //fte+csqc has its own team menu
         //ask the client to activate it
         Menu_Close(pe_player);
-        UpdateClientMenu_Spy(pe_player);
+        UpdateClientMenu_Spy(pe_player, noupdate);
         return;
     }
 
@@ -769,12 +769,12 @@ void (float inp) Menu_Demoman_Input = {
         TeamFortress_SetDetpack(255);
 };
 
-void () Menu_Demoman = {
+void (float noupdate) Menu_Demoman = {
     if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
         //fte+csqc has its own team menu
         //ask the client to activate it
         Menu_Close(self);
-        UpdateClientMenu_Detpack(self, FALSE);
+        UpdateClientMenu_Detpack(self, FALSE, noupdate);
         return;
     }
     
@@ -792,15 +792,15 @@ void (float inp) Menu_Demoman_Cancel_Input = {
     if (inp == 1)
         TeamFortress_DetpackStop();
     else
-        Menu_Demoman_Cancel();
+        Menu_Demoman_Cancel(TRUE);
 }
 
-void () Menu_Demoman_Cancel = {
+void (float noupdate) Menu_Demoman_Cancel = {
     if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
         //fte+csqc has its own team menu
         //ask the client to activate it
         Menu_Close(self);
-        UpdateClientMenu_Detpack(self, TRUE);
+        UpdateClientMenu_Detpack(self, TRUE, noupdate);
         return;
     }
     local string s_detpack = "Setting detpack...\n\n";
@@ -818,7 +818,7 @@ void (float inp) Menu_Engineer_Input = {
         return;
 
     if (self.is_building) {
-        Menu_Engineer(self);
+        Menu_Engineer(self, FALSE);
         return;
     }
 
@@ -872,7 +872,7 @@ void (float inp) Menu_Engineer_Input = {
 
 };
 
-void (entity player) Menu_Engineer = {
+void (entity player, float noupdate) Menu_Engineer = {
     local entity te, dist_checker;
     local string s_action  = "Action:\n\n";
     local string s_sentry  = "\n";
@@ -885,7 +885,7 @@ void (entity player) Menu_Engineer = {
         //fte+csqc has its own team menu
         //ask the client to activate it
         Menu_Close(player);
-        UpdateClientMenu_Build(player);
+        UpdateClientMenu_Build(player, noupdate);
         return;
     }
 
@@ -932,7 +932,7 @@ void (entity player) Menu_Engineer = {
 
 void () Menu_Engineer_Update = {
     if (self.owner.menu_input == Menu_Engineer_Input) {
-        Menu_Engineer(self.owner);
+        Menu_Engineer(self.owner, TRUE);
         self.nextthink = time + 0.3;
     } else {
         self.owner.has_menutimer = 0;
@@ -1185,15 +1185,15 @@ void (float inp) Menu_Engineer_Cancel_Input = {
     if (inp == 1)
         TeamFortress_EngineerBuildStop();
     else
-        Menu_Engineer_Cancel();
+        Menu_Engineer_Cancel(TRUE);
 }
 
-void () Menu_Engineer_Cancel = {
+void (float noupdate) Menu_Engineer_Cancel = {
     if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
         //fte+csqc has its own team menu
         //ask the client to activate it
         Menu_Close(self);
-        UpdateClientMenu_Build(self);
+        UpdateClientMenu_Build(self, noupdate);
         return;
     }
     local string s_build = "Building...\n\n";

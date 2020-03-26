@@ -847,7 +847,7 @@ void () CF_Spy_UndercoverThink = {
 
     Status_Refresh(self.owner);
     if (self.owner.menu_input == Menu_Spy_Input)
-        Menu_Spy(self.owner);
+        Menu_Spy(self.owner, FALSE);
 
     dremove(self);
 };

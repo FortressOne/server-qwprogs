@@ -9,7 +9,7 @@ void () MirvGrenadeTouch;
 void () MirvGrenadeExplode;
 void (vector org, entity shooter) MirvGrenadeLaunch;
 
-void () TeamFortress_DetpackMenu;
+void (float noupdate) TeamFortress_DetpackMenu;
 void () TeamFortress_DetpackStop;
 void () TeamFortress_DetpackSet;
 void () TeamFortress_DetpackExplode;
@@ -101,7 +101,7 @@ void (vector org, entity shooter) MirvGrenadeLaunch = {
     setorigin(newmis, org);
 };
 
-void () TeamFortress_DetpackMenu = {
+void (float noupdate) TeamFortress_DetpackMenu = {
     local entity detpack;
 
     if (self.ammo_detpack <= 0) {
@@ -124,7 +124,7 @@ void () TeamFortress_DetpackMenu = {
         detpack = find(detpack, classname, "detpack");
     }
 
-    Menu_Demoman();
+    Menu_Demoman(noupdate);
 };
 
 void (float timer) TeamFortress_SetDetpack = {
@@ -208,7 +208,7 @@ void (float timer) TeamFortress_SetDetpack = {
 
     sprint(self, PRINT_HIGH, "Setting detpack for ", stimer,
            " seconds...\n");
-    Menu_Demoman_Cancel();
+    Menu_Demoman_Cancel(FALSE);
 
     newmis = spawn();
     newmis.owner = self;

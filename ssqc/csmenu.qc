@@ -54,17 +54,18 @@ void UpdateClientMenu_DropAmmo(entity pl, float ammotypes, float ammomakes) = {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
-void UpdateClientMenu_Scout(entity pl) = {
+void UpdateClientMenu_Scout(entity pl, float noupdate) = {
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
     WriteFloat(MSG_MULTICAST, CLIENT_MENU_SCOUT);
     WriteByte(MSG_MULTICAST, pl.ScannerOn);
     WriteFloat(MSG_MULTICAST, pl.tf_items_flags);
+    WriteByte(MSG_MULTICAST, noupdate);
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
-void UpdateClientMenu_Spy(entity pl) = {
+void UpdateClientMenu_Spy(entity pl, float noupdate) = {
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
@@ -72,6 +73,7 @@ void UpdateClientMenu_Spy(entity pl) = {
     WriteFloat(MSG_MULTICAST, invis_only);
     WriteFloat(MSG_MULTICAST, pl.last_skin);
     WriteFloat(MSG_MULTICAST, pl.last_team);
+    WriteByte(MSG_MULTICAST, noupdate);
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
@@ -90,20 +92,23 @@ void UpdateClientMenu_Spy_Team(entity pl) = {
     WriteFloat(MSG_MULTICAST, CLIENT_MENU_SPY_TEAM);
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
-void UpdateClientMenu_Detpack(entity pl, float cancel_detpack) = {
+void UpdateClientMenu_Detpack(entity pl, float cancel_detpack, float noupdate) = {
+    bprint(PRINT_HIGH, "MEHT: UpdateClientMenu_Detpack: ", ftos(cancel_detpack),", ", ftos(noupdate),"\n");
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
     WriteFloat(MSG_MULTICAST, CLIENT_MENU_DETPACK);
     WriteByte(MSG_MULTICAST, cancel_detpack);
+    WriteByte(MSG_MULTICAST, noupdate);
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
-void UpdateClientMenu_Build(entity pl) = {
+void UpdateClientMenu_Build(entity pl, float noupdate) = {
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
     WriteFloat(MSG_MULTICAST, CLIENT_MENU_BUILD);
+    WriteByte(MSG_MULTICAST, noupdate);
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 void UpdateClientMenu_FixSentry(entity pl) = {
