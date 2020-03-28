@@ -6,6 +6,7 @@ defs.qc
 ../share/commondefs.qc
 ../share/common_helpers.qc
 qw.qc
+events.qc
 q3defs.qc
 debug.qc
 status.qc
@@ -49,6 +50,7 @@ quadmode.qc
 tfort.qc
 tforthlp.qc
 tfortmap.qc
+login.qc
 commands.qc
 ctf.qc
 coop.qc

@@ -19,8 +19,11 @@ void () TeamFortress_MOTD = {
     
     if (self.motd == 5) {
         if(csqcactive) {
-            if(self.team_no == 0 && !intermission_running) {
-                Menu_Team(0);
+            if(self.team_no == 0 && !intermission_running ) {
+                if (loginRequired && !self.login)
+                    Menu_Login();
+                else
+                    Menu_Team(0);
             }
         } else {
             sprint(self, PRINT_HIGH, "\nFortressOne ", VER, "\n\n");
@@ -221,7 +224,10 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias ("nginfo", TF_NAILGREN_INFO, 0); //nailgreninfo
         TeamFortress_AliasString("break", "cmd break");
     } else if (self.motd == 400 && self.team_no == 0 && !csqcactive) {
-        Menu_Team(1);
+        if (loginRequired && !self.login)
+            Menu_Login();
+        else
+            Menu_Team(1);
     }
 
     self.motd = self.motd + 1;

@@ -632,6 +632,19 @@ void () DecodeLevelParms = {
         // After a duel round, print the winners' health stats
         round_winner_print_health = CF_GetSetting("dph", "duel_print_health", "0");
 
+        // enforces login
+        loginRequired = CF_GetSetting("loginrequired", "logreq", "0");
+
+        // login request https endpoint
+        loginUrl = infokey(world, "loginurl");
+
+        // server webpage address (required for login to work)
+        webpageUrl = infokey(world, "webpageurl");
+
+        if (loginRequired && (!loginUrl || !webpageUrl)) {
+            loginRequired = 0;
+        }
+
         st = infokey(world, "default");
         if (st == "on") {
             impulse_queue = FALSE;
@@ -910,7 +923,8 @@ void () IntermissionThink = {
         return;
     if ((!self.button0 && !self.button1) && !self.button2)
         return;
-
+    if (logfilehandle > 0)
+        fclose(logfilehandle);
     dprint("Intermission think\n");
     GotoNextMap();
 };
@@ -993,6 +1007,7 @@ void () execute_changelevel = {
     }
     if (!clan_scores_dumped) {
         DumpClanScores();
+        MapEndSequence();
         clan_scores_dumped = 1;
     }
 };
@@ -1644,6 +1659,11 @@ void () PutClientInServer = {
     }
     if (deathmatch == 3) {
         if(self.nextpc != self.playerclass) {
+            if (self.playerclass != 0) {
+                local float timeplayed = gametime - self.classtime;
+                LogEventChangeClass(self, self.playerclass, self.nextpc, timeplayed);
+                self.classtime = gametime; 
+            }
             self.playerclass = self.nextpc;
         }
         if (self.playerclass == PC_RANDOM)
@@ -2441,7 +2461,7 @@ void () PlayerPostThink = {
         CheckPowerups();
         W_WeaponFrame();
         //TeamFortress_CheckforCheats();
-        TeamFortress_SetSpeed(self);
+        //TeamFortress_SetSpeed(self);
     } else {
         CheckPowerups();
         W_WeaponFrame();
@@ -2476,6 +2496,11 @@ void (optional float csqcactive) ClientConnect = {
 
     if (self.netname == string_null)
         KickCheater(self);
+
+    if (infokey(self,"*login"))
+        self.login = infokey(self,"*login");
+    if (self.login == string_null)
+        sprint(self,2, "Login required, please use \"cmd login <login> <secret>\" \nbefore joining the game\n");
 
     TeamFortress_Alias("id", TF_ID, 0);
 
@@ -2586,6 +2611,11 @@ void () ClientDisconnect = {
 
     fr = rint(self.frags);
     st = ftos(fr);
+
+    local float timeplayed = gametime - self.classtime;
+    LogEventChangeClass(self, self.playerclass, 0, timeplayed);
+    self.classtime = gametime;
+
     bprint4(PRINT_HIGH, self.netname, " left the game with ", st,
             " frags\n");
     sound(self, 4, "player/tornoff2.wav", 1, ATTN_NONE);

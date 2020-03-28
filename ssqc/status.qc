@@ -576,6 +576,10 @@ void (entity pl, string s1, string s2, string s3, string s4, string s5) CenterPr
     Status_Print(pl, s1, s2, s3, s4, s5);
 };
 
+void (entity pl, string s1, string s2, string s3, string s4, string s5, string s6) CenterPrint6 = {
+    Status_Print(pl, s1, s2, s3, s4, s5, s6);
+};
+
 string getLocationName(vector location);
 
 void (entity Player, float index, entity Item, float icon) InitClientFlagStatus = {

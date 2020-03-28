@@ -187,6 +187,7 @@ void () NapalmGrenadeExplode = {
     head = spawn();
     head.think = NapalmGrenadeNetThink;
     head.classname = "grentimer";
+    head.grenadename = "napalmfire";
     head.nextthink = time + 0.1;
     head.heat = 0;
     head.origin = self.origin;

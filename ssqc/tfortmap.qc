@@ -755,6 +755,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
     if (Player == AP) {
         if (Goal.count > 0) {
             if (Player.team_no > 0) {
+                LogEventGoal(Player);
                 TeamFortress_TeamIncreaseScore(Player.team_no, Goal.count);
                 TeamFortress_TeamShowScores(2);
                 Player.caps = Player.caps + 1;
@@ -1769,6 +1770,7 @@ void (entity Goal, entity AP, float addb) DoResults = {
     }
     if (winners == 1) {
         TeamFortress_TeamShowScores(2);
+        LogEventGoal(AP);
     }
     if (CTF_Map == 1) {
         if (AP != world) {
@@ -2253,6 +2255,8 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
     Status_Refresh(AP);
     DoResults(Item, AP, 1);
     DoItemGroupWork(Item, AP);
+    AP.goalrunningtime = gametime;
+    LogEventPickupGoal(AP);
 };
 
 void () ReturnItem = {
@@ -2318,6 +2322,12 @@ void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer = {
             RemoveResults(Item, te);
         te = find(te, classname, "player");
     }
+    //Flag
+    if ((Item.goal_activation & 1)) {
+        local float timecarried = gametime - AP.goalrunningtime;
+        LogEventFumble(AP, timecarried);
+    }
+
     if ((method == 0) || (method == 2)) {
         te = find(world, classname, "player");
         while (te != world) {
@@ -2878,6 +2888,7 @@ void (entity P) ForceRespawn = {
 
 void () DropGoalItems = {
     local entity te, search;
+    local float timecarried;
     
     newmis = spawn();
     makevectors(self.v_angle);
@@ -2893,6 +2904,8 @@ void () DropGoalItems = {
             }
             //Always allow dropping 4096
             else if (self.effects & EF_DIMLIGHT || te.goal_activation & 4096) {
+                timecarried = gametime - self.goalrunningtime;
+                LogEventFumble(self, timecarried);
                 te.angles = '0 0 0';
                 tfgoalitem_RemoveEffectsFromPlayer(te, self);
                 tfgoalitem_drop(te, 1, self);

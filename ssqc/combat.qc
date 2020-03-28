@@ -318,7 +318,11 @@ void (entity targ, entity inflictor, entity attacker,
         targ.armorclass = 0;
         targ.armorvalue = 0;
     }
+    if ((attacker.classname == "player" || targ.classname == "player") && (take + save > 0)) {
+        LogEventDamage(attacker, targ, inflictor, take + save);
+    }
     if (targ.health <= 0) {
+        LogEventKill(attacker, targ, inflictor);
         Killed(targ, attacker);
         return;
     }
@@ -579,7 +583,9 @@ void (entity targ, entity inflictor, entity attacker, float damage,
 
     if (no_damage == TRUE)
         return;
-
+    if ((attacker.classname == "player" || targ.classname == "player") && (take + save > 0)) {
+        LogEventDamage(attacker, targ, inflictor, take + save);
+    }
     if (targ.armorvalue < 1) {
         targ.armorclass = 0;
         targ.armorvalue = 0;
@@ -590,7 +596,7 @@ void (entity targ, entity inflictor, entity attacker, float damage,
         if ((inflictor.classname == "detpack")
             && (inflictor.weaponmode == 1) && (inflictor.enemy == targ))
             deathmsg = DMSG_DETPACK_DIS;
-
+        LogEventKill(attacker, targ, inflictor);
         Killed(targ, attacker);
         return;
     }

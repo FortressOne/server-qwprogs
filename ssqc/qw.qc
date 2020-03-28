@@ -659,3 +659,21 @@ string (string s, float width) strpadr =
 
 float captainmode;
 .float captain;
+
+
+//Player ID
+float loginRequired;
+string loginUrl;
+string webpageUrl;
+.string login;
+.float login_in_progress;
+
+
+//Logging fields
+float gametime;
+string gametimestamp;
+float logfilehandle;
+float canlog;
+.string grenadename;
+.float classtime;
+.float goalrunningtime;

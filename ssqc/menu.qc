@@ -205,9 +205,27 @@ string (float pf_team_no, string ps_team) Menu_Team_TeamString = {
     return strzone(s_string);
 };
 
+void (float inp) Menu_No_Input = {
+    return;
+}
+
+void () Menu_Login = {
+    local string st1, st2, st3;
+
+    sprint (self, 2, "Login required, please use \"cmd login <login> <secret>\" before joining the game\n");
+    st1 = "Login required, please use\n\s\"cmd login <login> <secret>\"\s \nbefore joining the game\n";
+    st2 =  "If you don't have an account, visit\n\s";
+    st3 = webpageUrl;
+    st3 = strcat(st3, "\s\n");
+    st2 = strcat(st2, st3);
+    st1 = strcat(st1, st2);
+    Status_Menu(self, Menu_No_Input, st1);
+    return;
+}
+
 void (float update) Menu_Team = {
     local entity timer;
-    
+
     if (self.classname == "observer")
         /* Status_Menu(self, Menu_Team_Input, ""); */
         return;

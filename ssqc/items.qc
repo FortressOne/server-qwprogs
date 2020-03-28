@@ -744,7 +744,11 @@ void (entity pl, float typ) PrintGrenadeType = {
     } else if (typ == 2) {
         st = "concussion";
     } else if (typ == 3) {
-        st = "nail";
+        if (nailgren_type == NGR_TYPE_LASER) {
+            st = "shock";
+        } else {
+            st = "nail";
+        }
     } else if (typ == 4) {
         st = "mirv";
     } else if (typ == 5) {

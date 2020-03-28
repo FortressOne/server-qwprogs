@@ -19,7 +19,7 @@ void () RestartMap = {
     bprint(PRINT_HIGH, self.netname);
     bprint(PRINT_HIGH, " Has restarted the map.\n");
 
-    localcmd ("map ");
+    localcmd ("changelevel ");
     localcmd (mapname);
     localcmd ("\n");
 }
@@ -280,7 +280,8 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
     local float arg_num, processedCmd, inp;
     local string tmp;
     local float farg2,farg3;
-    local entity ent;
+    local entity ent, pl;
+
     processedCmd = FALSE;
     
     if (arg1)
@@ -793,6 +794,46 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             sprint(self, PRINT_HIGH, "cmd help || list (this command)\n");
             sprint(self, PRINT_HIGH, "\n");
             break;
+        case "login":
+            processedCmd = TRUE;
+            if (arg_num == 2) {
+                if (self.login != string_null) {
+                    sprint (self, PRINT_HIGH, "You are already logged in\n");
+                }
+                else {
+                    performLogin(self,arg2,arg3);
+                }
+            }
+            else {
+                sprint (self, PRINT_HIGH, "Missing username/password\n");
+            }
+            break;
+        case "login-silent" :
+            processedCmd = TRUE;
+            if (arg3 != string_null) {
+                performLogin(self,arg2,arg3);
+            }
+            break;
+        case "who":
+            processedCmd = TRUE;
+            pl = find (world, classname, "player");
+            string msg;
+            while (pl) {
+                msg = string_null;
+                msg = strcat(msg, infokey(pl,"name"));
+                msg = strcat(msg, " - ");
+                if (pl.login != string_null)
+                    msg = strcat(msg, pl.login);
+                else
+                    msg = strcat(msg, "NOT LOGGED IN");
+                if (pl.is_admin) {
+                    msg = strcat(msg, " (admin)");
+                }
+                msg = strcat(msg, "\n");
+                sprint(self, PRINT_HIGH, msg);
+                pl = find (pl, classname, "player");
+            }
+            break;
     }
    
     if (self.is_admin)
@@ -1006,7 +1047,16 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     bprint(PRINT_HIGH, " has changed the map to ");
                     bprint(PRINT_HIGH, arg2);
                     bprint(PRINT_HIGH, "\n");
-                    localcmd("map ");
+                    if (!clan_scores_dumped) {
+                        if (quadmode) {
+                            rounds = 1;
+                            QuadRoundOver();
+                        }
+                        DumpClanScores();
+                        MapEndSequence();
+                        clan_scores_dumped = 1;
+                    }
+                    localcmd("changelevel ");
                     localcmd(arg2);
                     localcmd("\n");
                 }

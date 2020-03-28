@@ -972,6 +972,7 @@ void () W_FireAssaultCannon = {
     {
         FireAssCan(5, dir, '0.04 0.04 0');
     }
+    LogEventAttack(self);
 };
 
 void (entity pe_flame) CF_ExtinguishFlame = {
@@ -1349,6 +1350,7 @@ void () W_FireSuperSpikes = {
     self.currentammo = self.ammo_nails;
     dir = aim(self, 1000);
     launch_spike(self.origin + '0 0 16', dir);
+    LogEventAttack(self);
     newmis.touch = superspike_touch;
     newmis.weapon = DMSG_SNAILGUN;
     setmodel(newmis, "progs/s_spike.mdl");
@@ -1379,6 +1381,7 @@ void (float ox) W_FireSpikes = {
     }
     dir = aim(self, 1000);
     launch_spike(self.origin + '0 0 16' + v_right * ox, dir);
+    LogEventAttack(self);
     KickPlayer(-3, self);
 };
 
@@ -1937,7 +1940,7 @@ void () W_Attack = {
     if (self.has_disconnected == TRUE)
         return;
 
-    if (self.tfstate & TFSTATE_RELOADING)
+    if (self.tfstate & TFSTATE_RELOADING || self.is_detpacking)
         return;
     
     if(no_fire_mode)
@@ -2092,6 +2095,12 @@ void () W_Attack = {
         W_FireLaser();
         Attack_Finished(0.4);
     }
+
+    //These weapons have to log each projectile launched/bullet fired
+    if (self.current_weapon != WEAP_ASSAULT_CANNON ||
+        self.current_weapon != WEAP_NAILGUN ||
+        self.current_weapon != WEAP_SUPER_NAILGUN)
+        LogEventAttack(self);
 };
 
 float (entity pl) WeaponReady = {
@@ -3079,6 +3088,10 @@ void () DeadImpulses = {
         TeamFortress_ChangeClass(self.impulse - TF_CHANGEPC_SCOUT + 1);
     } else if ((self.playerclass != 0) && (self.impulse == TF_CHANGETEAM)
                && (deathmatch == 3) && (!cb_prematch)) {
+        if (loginRequired && !self.login) {
+            sprint (self, 2, "Login required, please use \"cmd login <login> <secret>\" before joining the game\n");
+            return;
+        }
         Menu_Team(0);
     } else if ((self.playerclass != 0) && (self.impulse == TF_CHANGECLASS)
                && (deathmatch == 3) && (!cb_prematch)) {
@@ -3213,6 +3226,17 @@ void () DeadImpulses = {
 
 
 void () W_WeaponFrame = {
+
+    if (self.login_in_progress) {
+        CenterPrint(self, "Trying to log in...");
+    }
+    
+    if (loginRequired && !self.login) {
+        PrintLoginMessage();
+        self.impulse = 0;
+        return;
+    }
+
     if (self.menu_input) {
         if (self.impulse > 0 && self.impulse <= 10) {
             Menu_Input(self.impulse);
