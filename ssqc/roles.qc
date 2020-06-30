@@ -15,7 +15,7 @@ typedef struct {
     float respawn_delay_time;
     float gren1_limits[10];
     float gren2_limits[10];
-    float class_limits[11];
+    float class_limits[12];
 } Team_Role;
 
 var Team_Role Role_None = {"Default", "", 6};
@@ -26,7 +26,7 @@ Team_Role * Team2_Role;
 Team_Role * Team3_Role;
 Team_Role * Team4_Role;
 
-const string CLASSES [11] = {
+const string CLASSES [12] = {
     "observer",
     "scout",
     "sniper",
@@ -37,7 +37,8 @@ const string CLASSES [11] = {
     "pyro",
     "spy",
     "engineer",
-    "randompc"
+    "randompc",
+    "civilian"
 };
 
 void (Team_Role * role) LoadRole = {
