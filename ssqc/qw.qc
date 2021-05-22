@@ -729,3 +729,17 @@ float FO_FlashDimension;
 
 .float special_cooldown;
 .float airblast_cooldown;
+
+// lag compensation
+float fte_lc_asscann;
+float fte_lc_pipebombs;
+float fte_lc_tranq;
+float fte_lc_railgun;
+float fte_lc_nailgun;
+float fte_lc_nailgun_experimental_inflictor;
+float fte_lc_rockets;
+float fte_lc_grenades;
+float fte_lc_normal_grenades;
+
+
+

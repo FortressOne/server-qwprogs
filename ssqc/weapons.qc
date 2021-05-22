@@ -1099,6 +1099,10 @@ void () W_FireRocket = {
     newmis.touch = T_MissileTouch;
     newmis.voided = 0;
 
+    if (fte_lc_rockets) {
+        newmis.flags = FL_LAGGEDMOVE;
+    }
+
     newmis.nextthink = time + 5;
     newmis.think = SUB_Remove;
 
@@ -1291,6 +1295,9 @@ void () W_FireGrenade = {
         newmis.skin = 1;
         newmis.touch = GrenadeTouch;
         newmis.nextthink = time + 2.5;
+        if (fte_lc_grenades) {
+            newmis.flags = FL_LAGGEDMOVE;
+        }
     } else {
         if (old_pipecooldown)
             self.pipecooldown = time + 0.8;
@@ -1303,6 +1310,9 @@ void () W_FireGrenade = {
         newmis.nextthink = time + 120;
         newmis.weapon = 11;
         newmis.team_no = self.team_no;
+        if (fte_lc_pipebombs) {
+            newmis.flags = FL_LAGGEDMOVE;
+        }
     }
     makevectors(self.v_angle);
     if (self.v_angle_x) {
@@ -1331,7 +1341,9 @@ void (vector org, vector dir) launch_spike = {
     newmis.owner = self;
     newmis.movetype = MOVETYPE_FLYMISSILE;
     newmis.solid = SOLID_BBOX;
-
+    if (fte_lc_nailgun) {
+        newmis.flags = FL_LAGGEDMOVE;
+    }
     newmis.angles = vectoangles(dir);
     newmis.touch = spike_touch;
     newmis.weapon = DMSG_NAILGUN;
@@ -1519,9 +1531,15 @@ void () superspike_touch = {
         if (self.owner.classname == "grenade")
             TF_T_Damage(other, self, self.owner.owner, ndmg, TF_TD_NOTTEAM,
                         TF_TD_NAIL);
-        else
-            TF_T_Damage(other, self, self.owner, ndmg, TF_TD_NOTTEAM,
-                        TF_TD_NAIL);
+        else {
+            if (fte_lc_nailgun_experimental_inflictor && fte_lc_nailgun) {
+                 TF_T_Damage(other, self.owner, self.owner, ndmg, TF_TD_NOTTEAM,
+                     TF_TD_NAIL);
+            } else {
+                TF_T_Damage(other, self, self.owner, ndmg, TF_TD_NOTTEAM,
+                            TF_TD_NAIL);
+            }
+        }
     } else {
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
         WriteByte(MSG_MULTICAST, TE_SUPERSPIKE);

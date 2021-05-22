@@ -720,6 +720,10 @@ void () W_FireIncendiaryCannon = {
         }
     }
     
+    if (fte_lc_rockets) {
+        newmis.flags = FL_LAGGEDMOVE;
+    }
+    
     newmis.angles = vectoangles(newmis.velocity);
     newmis.touch = T_IncendiaryTouch;
     newmis.nextthink = time + 5;

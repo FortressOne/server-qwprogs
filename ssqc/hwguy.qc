@@ -16,8 +16,12 @@ void AssCanBulletTouch()
     deathmsg = self.weapon;
     if (other.health)
     {
-        TF_T_Damage(other, self, self.owner, 8, TF_TD_NOTTEAM,
+        if (fte_lc_asscann) 
+            TF_T_Damage(other, self.owner, self.owner, 8, TF_TD_NOTTEAM,
                     TF_TD_OTHER);
+        else 
+            TF_T_Damage(other, self, self.owner, 8, TF_TD_NOTTEAM,
+                TF_TD_OTHER);
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
         WriteByte(MSG_MULTICAST, TE_BLOOD);
         WriteByte(MSG_MULTICAST, 1);
@@ -79,6 +83,10 @@ void LaunchAssCan(vector org, vector dir, float proj_speed)
 	newmis.skin = 16 + random()*7;				// Bright colours
     newmis.weapon = DMSG_ASSAULTCANNON;
 
+    if (fte_lc_asscann) {
+        newmis.flags = FL_LAGGEDMOVE;
+    }
+    
 	newmis.velocity = dir * proj_speed;			// Constant speed multiplier
 	newmis.angles = vectoangles(dir);			// Create direction angle
 	setsize (newmis, VEC_ORIGIN, VEC_ORIGIN);	// Zero size

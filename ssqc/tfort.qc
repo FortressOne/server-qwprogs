@@ -1008,13 +1008,17 @@ void () TeamFortress_GrenadePrimed = {
     newmis.angles = vectoangles(newmis.velocity);
     newmis.think = SUB_Null;
     newmis.nextthink = self.heat;
+
     if (self.weapon == GR_TYPE_NORMAL) {
         newmis.touch = NormalGrenadeTouch;
         newmis.think = NormalGrenadeExplode;
         newmis.grenadename = "normalgrenade";
         newmis.skin = 0;
-        newmis.avelocity = '300 300 300';
-        FO_SetModel(newmis, "progs/hgren2.mdl");
+        newmis.avelocity = '300 300 300';        
+        FO_SetModel(newmis, "progs/hgren2.mdl");        
+        if (fte_lc_normal_grenades) {
+            newmis.flags = FL_LAGGEDMOVE;
+        }
     } else if (self.weapon == GR_TYPE_CONCUSSION) {
         newmis.touch = ConcussionGrenadeTouch;
         newmis.think = ConcussionGrenadeExplode;
