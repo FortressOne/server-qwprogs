@@ -367,12 +367,8 @@ void AddGrenTimer(float grentype) {
     for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
         if(FO_Hud_Grentimers[i].grentype == 0) {
             FO_Hud_Grentimers[i].grentype = grentype;
+            FO_Hud_Grentimers[i].icon_index = grentype;
             FO_Hud_Grentimers[i].expires = time + 3.8;
-            if(grentype == GR_TYPE_NORMAL) {
-                FO_Hud_Grentimers[i].icon_index = 1;
-            } else {
-                FO_Hud_Grentimers[i].icon_index = 2;
-            }
             break;
         }
     }

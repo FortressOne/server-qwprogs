@@ -261,6 +261,11 @@ void() CSQC_Parse_Event = {
             quad_round = readfloat();
             //game_started = readbyte();
             break;
+        case MSG_GRENADESETTINGS:
+            fo_flash = readfloat();
+            medic_type = readfloat();
+            nailgren_type = readfloat();
+            break;
         case MSG_GRENTHROWN:
             grentimer_waiting = FALSE;
             break;

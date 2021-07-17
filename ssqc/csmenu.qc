@@ -284,6 +284,18 @@ void UpdateClientPrematch(entity pl, float countdownstarted) = {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
+void UpdateClientGrenadeSettings(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
+    WriteByte(MSG_MULTICAST, MSG_GRENADESETTINGS);
+    WriteFloat(MSG_MULTICAST, fo_flash);
+    WriteFloat(MSG_MULTICAST, medic_type);
+    WriteFloat(MSG_MULTICAST, nailgren_type);
+    multicast('0 0 0', MULTICAST_ONE_R_NOSPECS);
+}
+
 void UpdateClientMapVote(entity pl, entity candidate) = {
     if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE) || !candidate)
         return;

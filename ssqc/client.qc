@@ -2033,11 +2033,12 @@ void () PutClientInServer = {
         self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
         TeamFortress_SetSpeed(self);
     }
-    
+
     if (self.playerclass == 0 && self.team_no > 0) {
         Menu_Class(0);
     }
 
+    UpdateClientGrenadeSettings(self);
 };
 
 //void () info_player_start = {

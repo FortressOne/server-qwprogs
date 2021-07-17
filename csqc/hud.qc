@@ -852,7 +852,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
         /* drawpic(pos, icon, size, '1 1 1', 1, 0); */
 
         float len = 0, offset = 0;
-        
+
         switch (playerclass)
         {
             case PC_SCOUT:
