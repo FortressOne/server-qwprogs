@@ -67,6 +67,8 @@ float (float tno) TeamFortress_TeamGetLives;
 void () InitReverseCap;
 float () RejoinWithTfId;
 void () CreateTfIdAndJoin;
+entity (entity e)TeamFortress_GetPracticeSpawn;
+
 
 void () info_intermission =
 {
@@ -758,6 +760,9 @@ void () DecodeLevelParms = {
         
         // disable setinfo keepcells [off]
         nokeepcells = CF_GetSetting("nkc", "nokeepcells", "0");
+        
+        // allow clients to place a personal practice spawn [off]
+        allowpracspawns = CF_GetSetting("aps", "allowpracspawns", "0");
 
         // enable server-side flaginfo on statusbar [on]
         //        server_sbflaginfo = CF_GetSetting("ssbfi", "server_sbflaginfo", "1");
@@ -1328,6 +1333,7 @@ void () RemovePlayerOwnedEnts = {
     TeamFortress_RemoveTimers();
     RemoveGasTimers();
     Engineer_QuietlyRemoveBuildings(self);
+    TeamFortress_RemovePracticeSpawn(self);
     te = find(world, classname, "detpack");
     while (te) {
         if (te.owner == self) {
@@ -1518,7 +1524,10 @@ void () ClientKill = {
     TeamFortress_RemoveTimers();
 
     // players can't suicide again for 10 seconds
-    self.suicide_time = time + 5 + random() * 5;
+    if(!allowpracspawns)
+	self.suicide_time = time + 5 + random() * 5;
+     else 
+	self.suicide_time = time;
 
     if (self.clientkillfree == 1 && !self.has_throwngren && (self.has_changedteam || self.has_changedclass)) {
         TeamFortress_SetupRespawn(FALSE);
@@ -1671,6 +1680,15 @@ void (entity e) ValidateUser = {
 
 entity () SelectSpawnPoint =
 {
+    if(allowpracspawns && self != world)
+    {
+	local entity spot2;
+	spot2 = TeamFortress_GetPracticeSpawn(self);
+	
+	if(spot2 != world)
+		return spot2;
+    }
+    
     local entity spot;
     local float attempts;
 
@@ -2973,6 +2991,7 @@ void () ClientDisconnect = {
     if(votemode) {
         UnvoteForMap(self);
     }
+    
 };
 
 string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage = {

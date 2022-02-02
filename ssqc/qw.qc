@@ -616,6 +616,7 @@ float solid_nailgren;
 float noreturn;
 float nohitsounds;
 float nokeepcells;
+float allowpracspawns;
 //float server_sbflaginfo;
 float reverse_cap;
 float engineer_move;

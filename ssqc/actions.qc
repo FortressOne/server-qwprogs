@@ -865,3 +865,61 @@ void () TeamFortress_ClipTick = {
         dremove(self);
     }
 };
+
+entity TeamFortress_GetPracticeSpawn(entity e)  =
+{
+	local entity spt = find(world, classname, "practicespawn");
+	while (spt != world) 
+	{
+		if (spt.owner == e)
+		{
+			return spt;
+		}
+		spt = find(spt, classname, "practicespawn");
+        } 
+        
+        return world;
+};
+
+void TeamFortress_RemovePracticeSpawn(entity e) =
+{
+	if(e == world)
+		return;
+	if(!allowpracspawns)
+		return;
+	
+	local entity spt = TeamFortress_GetPracticeSpawn(e);
+	
+	if(spt != world)
+	{
+		spawn_tfog(spt.origin);
+		dremove(spt);
+		
+	}
+};
+
+
+void TeamFortress_PlacePracticeSpawn(entity e) =
+{
+	if(e == world)
+		return;
+	if(!allowpracspawns)
+		return;
+	
+	TeamFortress_RemovePracticeSpawn(e);
+
+	local entity ps = spawn();
+	ps.owner = e;
+	ps.movetype = MOVETYPE_NONE;
+	ps.solid = SOLID_NOT;
+	ps.classname = "practicespawn";
+	setsize(ps, '0 0 0', '0 0 0');
+	setorigin(ps, e.origin + '0 0 8');
+	FO_SetModel(ps, "progs/s_light.spr");
+	sprint(e, PRINT_HIGH, "your practice spawn has been placed @ ", vtos(e.origin),".\n");
+	spawn_tfog(ps.origin);
+		
+	
+};
+
+

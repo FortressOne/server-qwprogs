@@ -63,7 +63,8 @@ void () TeamFortress_Discard_DropAmmo;
 float (float force) TeamFortress_DetonatePipebombs;
 void (float timer) TeamFortress_SetDetpack;
 void () TeamFortress_DetpackStop;
-
+void (entity e) TeamFortress_PlacePracticeSpawn;
+void (entity e) TeamFortress_RemovePracticeSpawn;
 void () DropKey;
 void () UseSpecialSkill;
 void () RemoveFlare;
@@ -2979,6 +2980,10 @@ void () ImpulseCommands = {
         else if (self.impulse == TF_DROP_AMMO) {
             Menu_Drop();
         }
+        else if (self.impulse == TF_PRACSPAWN_PLACE)
+	    TeamFortress_PlacePracticeSpawn(self);
+        else if (self.impulse == TF_PRACSPAWN_REMOVE)
+	    TeamFortress_RemovePracticeSpawn(self);
     }
 
     if (self.impulse == TF_INVENTORY)

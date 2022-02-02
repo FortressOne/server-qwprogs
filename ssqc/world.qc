@@ -200,6 +200,7 @@ void () worldspawn = {
     precache_model("progs/gib3.mdl");
     precache_model("progs/s_bubble.spr");
     precache_model("progs/s_explod.spr");
+    precache_model("progs/s_light.spr");
     precache_model("progs/v_axe.mdl");
     precache_model("progs/v_tranq.mdl");
     precache_model("progs/v_shot.mdl");

@@ -63,6 +63,7 @@ void () SpectatorConnect = {
     }
 
     TeamFortress_StartTimers();
+    TeamFortress_RemovePracticeSpawn(self);
 };
 
 void () SpectatorDisconnect = {
