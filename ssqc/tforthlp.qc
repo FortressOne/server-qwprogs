@@ -263,7 +263,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_AliasString("voteyes", "cmd voteyes");
         TeamFortress_AliasString("yes", "cmd voteyes");
         TeamFortress_Alias("placepracspawn", TF_PRACSPAWN_PLACE, 0);
-        TeamFortress_Alias("removepracpawn", TF_PRACSPAWN_REMOVE, 0);
+        TeamFortress_Alias("removepracspawn", TF_PRACSPAWN_REMOVE, 0);
         Quick_Aliases();
     } else if (self.motd == 400 && self.team_no == 0 && !csqcactive) {
         if (loginRequired && !self.login)
