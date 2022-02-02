@@ -3,7 +3,7 @@ FortressOne Server
 
 New features
 ------
-* Option to allow clients to set a personal spawn point to practice various things (ie. cuss jumps) 'localinfo allowpracspawns 1'. Clients can then use commands 'placepracspawn' and 'removepracspawn'. Suicide timers are disabled while allowpracspawns is enabled. 
+* Option to allow clients to set a personal spawn point to practice various things (ie. cuss jumps) `localinfo allowpracspawns 1`. Clients can then use commands `placepracspawn` and `removepracspawn`. Suicide timers are disabled while allowpracspawns is enabled. 
 * Option to configure hwguy armor `localinfo max_armor_hwguy 250`.
 * ``setinfo keepcells <number>`` allows scout/med/pyro/eng/hwguy to include cells above ``<number>`` into discards. eg. an eng with 200 cells that has ``setinfo keepcells 50`` will discard 150 cells and keep 50. sold/spy/sniper/demo will throw all cells regardless of ``<number>`` (current behaviour). suggest players using this setinfo use scout/med/pyro/eng/hwguy class configs to set values for each class. ``localinfo nokeepcells 1`` - disables keepcells server-wide
 * option to let engineer move while building `localinfo em on`.
