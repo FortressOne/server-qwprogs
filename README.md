@@ -88,10 +88,10 @@ New features
 * Option for hitsounds (1 - enemies only, 2 - enemies and teammates). `setinfo hitsound 2`
 * Option for medic to be immune from concussion effects. `localinfo medicnocuss on`.
 * Option to adjust concussion grenade effect time in seconds. `localinfo cussgrentime n`.
+* Option to adjust blast grenade effect time in seconds. `localinfo blastgrentime n`.
 * Increased nail velocity. Disable with `localinfo old_ng_velocity on`.
 * Nailgun and Super-nailgun damage configurable with `localinfo ng_damage` and `localinfo sng_damage`.
 * Keys and flags glow their colour.
-* Option to adjust conussion grenade effect time in seconds. `localinfo cussgrentime`.
 * Option to fully restock player on cap. `localinfo stock_on_cap on`.
 * Option for packs to fully restock health and armor of player. `localinfo stockfull on`.
 * Automatic server-side mvd recording of clan matches. Requires `localinfo serverdemo on`.

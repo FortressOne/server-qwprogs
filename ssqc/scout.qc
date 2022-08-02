@@ -12,12 +12,9 @@ void () ConcussionGrenadeTouch;
 void () ConcussionGrenadeExplode;
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
-void (entity inflictor, entity attacker, float bounce,
-      entity ignore) T_RadiusBounce;
-void (entity inflictor, entity attacker, float bounce,
-      entity ignore) T_RadiusBounceBlast;
-entity(entity scanner, float scanrange, float enemies,
-       float friends) T_RadiusScan;
+void (entity inflictor, entity attacker, float bounce, entity ignore) T_RadiusBounceCuss;
+void (entity inflictor, entity attacker, float bounce, entity ignore) T_RadiusBounceBlast;
+entity(entity scanner, float scanrange, float enemies, float friends) T_RadiusScan;
 
 void () CF_Scout_Dash = {
     if (self.playerclass != PC_SCOUT)
@@ -360,7 +357,7 @@ void () ConcussionGrenadeTouch = {
 };
 
 void () ConcussionGrenadeExplode = {
-    T_RadiusBounce(self, self.owner, 240, world);
+    T_RadiusBounceCuss(self, self.owner, 240, world);
     WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
     WriteByte(MSG_MULTICAST, TE_EXPLOSION);
     WriteCoord(MSG_MULTICAST, self.origin_x);
@@ -447,9 +444,7 @@ void () ConcussionGrenadeTimer = {
         return;
     }
 
-    if ((self.health == 200) || (self.health == 400) ||
-        (self.health == 600)
-        || (self.health == 800) || (self.health == 1000)) {
+    if ((self.health == 200) || (self.health == 400) || (self.health == 600) || (self.health == 800) || (self.health == 1000)) {
         newmis = spawn();
         FO_SetModel(newmis, "progs/s_bubble.spr");
         setorigin(newmis, self.owner.origin);
@@ -464,7 +459,9 @@ void () ConcussionGrenadeTimer = {
         newmis.cnt = 0;
         setsize(newmis, '-8 -8 -8', '8 8 8');
     }
+
     self.health = self.health - 10;
+
     if (self.owner.playerclass == 5)
         self.health = self.health - 10;
 
@@ -472,6 +469,7 @@ void () ConcussionGrenadeTimer = {
         self.health = 0;
 
     concadjust = 1;
+
     self.nextthink = time + 0.25 * concadjust;
 
     if (concadjust > 1)
@@ -505,6 +503,33 @@ void () ConcussionGrenadeTimer = {
     if (self.health <= 0) {
         sprint(self.owner, PRINT_HIGH, "Your head feels better now\n");
         self.owner.is_concussed = 0;
+        dremove(self);
+    }
+};
+
+void () BlastGrenadeTimer = {
+    local vector src;
+    local float pos;
+
+    if (self.owner.invincible_finished > time) {
+        sprint(self.owner, PRINT_HIGH, "Your air-control is back to normal\n");
+        self.owner.aircurve = 0;
+        dremove(self);
+        return;
+    }
+    self.owner.aircurve = (((40 * blastgrentime) - (self.health * blastgrenstrength)) / (40 * blastgrentime));
+    TeamFortress_SetSpeed(self.owner);
+
+    self.nextthink = time + 0.25;
+    self.health = self.health - 10;
+
+    if (self.health < 0)
+        self.health = 0;
+
+    if (self.health <= 0) {
+        sprint(self.owner, PRINT_HIGH, "Your air-control is back to normal\n");
+
+        TeamFortress_SetSpeed(self);
         dremove(self);
     }
 };
@@ -773,62 +798,90 @@ void CussSpeedBump()
     }
 }
 
-void (entity inflictor, entity attacker, float bounce,
-      entity ignore) T_RadiusBounceBlast = {
+void (entity inflictor, entity attacker, float bounce, entity ignore) T_RadiusBounceBlast = {
     local float points;
     local entity head;
     local vector org;
+    local entity te;
 
     head = findradius(inflictor.origin, bounce + 40);
+
     while (head) {
         if (head != ignore) {
             if (head.takedamage) {
+
                 org = head.origin + (head.mins + head.maxs) * 0.5;
                 points = 0.5 * vlen(org - inflictor.origin);
+
                 if (points < 0)
                     points = 0;
+
                 points = bounce - points;
 
-                if ((head.classname != "building_dispenser")
-                    && (head.classname != "building_sentrygun")
-                    && (head.classname != "building_sentrygun_base")
-                    && (points > 0)) {
+                if ((head.classname != "building_dispenser") && (head.classname != "building_sentrygun") && (head.classname != "building_sentrygun_base") && (points > 0)) {
                     head.velocity = org - inflictor.origin;
                     head.velocity = head.velocity * (points / 20) * blastgren_velocity_multiplier;
+
                     if (head.classname != "player") {
                         if (head.flags & FL_ONGROUND)
                             head.flags = head.flags - FL_ONGROUND;
+                    } else {
+                        te = find(world, classname, "timer");
+
+                        while (((te.owner != head) || (te.think != BlastGrenadeTimer)) && (te != world))
+                            te = find(te, classname, "timer");
+
+                        if (te != world) {
+                            te.health = 40 * blastgrentime;
+                            te.nextthink = time + 0.25;
+
+                        } else {
+                            LogEventAffliction(attacker, head, TFSTATE_BLASTED);
+
+                            te = spawn();
+                            te.nextthink = time + 0.25;
+                            te.think = BlastGrenadeTimer;
+                            te.team_no = attacker.team_no;
+                            te.classname = "timer";
+                            te.owner = head;
+                            te.health = 40 * blastgrentime;
+                            self.owner.aircurve = 1;
+                        }
                     }
                 }
             }
         }
+
         head = head.chain;
     }
 };
 
-void (entity inflictor, entity attacker, float bounce,
-      entity ignore) T_RadiusBounce = {
+void (entity inflictor, entity attacker, float bounce, entity ignore) T_RadiusBounceCuss = {
     local float actual_cuss_time = cussgrentime;
-    local float distance;    
+    local float distance;
     local float points;
     local entity head;
     local entity te;
     local vector org;
 
     head = findradius(inflictor.origin, bounce + 40);
+
     while (head) {
         if (head != ignore) {
             if (head.takedamage) {
                 org = head.origin + (head.mins + head.maxs) * 0.5;
                 distance = vlen(org - inflictor.origin);
                 points = 0.5 * distance;
+
                 if (points < 0)
                     points = 0;
+
                 points = bounce - points;
 
                 if (distance_based_cuss_duration) {
                     // Actual cuss time based on distance from max explosion radius
                     local float fractional_distance = (1 - (distance / (bounce + 40)));
+
                     if (fractional_distance <= 1 && fractional_distance > 0.80) {
                         actual_cuss_time = cussgrentime;
                     } else if (fractional_distance <= 0.8 && fractional_distance > 0.2) {
@@ -838,52 +891,23 @@ void (entity inflictor, entity attacker, float bounce,
                     }
                 }
 
-                if ((head.classname != "building_dispenser")
-                    && (head.classname != "building_sentrygun")
-                    && (head.classname != "building_sentrygun_base")
-                    && (points > 0)) {
+                if ((head.classname != "building_dispenser") && (head.classname != "building_sentrygun") && (head.classname != "building_sentrygun_base") && (points > 0)) {
                     head.velocity = org - inflictor.origin;
                     head.velocity = head.velocity * (points / 20);
+
                     if (head.classname != "player") {
                         if (head.flags & FL_ONGROUND)
                             head.flags = head.flags - FL_ONGROUND;
                     } else {
-                        if (head.playerclass == PC_MEDIC)
-                        {
-                            if (medicnocuss && (medic_type != MEDIC_TYPE_BLAST))
-                            {
-                                entity speedbump;
-                                speedbump = spawn();
-                                speedbump.think = CussSpeedBump;
-                                speedbump.nextthink = time + 1;
-                                speedbump.owner = head;
-
-                                head = head.chain;
-                                continue;
-                            }
-                        }
-
-                        if (distance_based_cuss_duration 
-                            && ((head.playerclass == PC_MEDIC) || (head.playerclass == PC_SCOUT))) {
-                            entity speedbump;
-                            speedbump = spawn();
-                            speedbump.think = CussSpeedBump;
-                            speedbump.nextthink = time + 1;
-                            speedbump.owner = head;
-                        }
-
                         te = find(world, classname, "timer");
-                        if (old_grens == TRUE)
-                            while (((te.owner != head) ||
-                                    (te.think !=
-                                     OldConcussionGrenadeTimer))
-                                   && (te != world))
+
+                        if (old_grens == TRUE) {
+                            while (((te.owner != head) || (te.think != OldConcussionGrenadeTimer)) && (te != world))
                                 te = find(te, classname, "timer");
-                        else
-                            while (((te.owner != head) ||
-                                    (te.think != ConcussionGrenadeTimer))
-                                   && (te != world))
+                        } else {
+                            while (((te.owner != head) || (te.think != ConcussionGrenadeTimer)) && (te != world))
                                 te = find(te, classname, "timer");
+                        }
 
                         if (te != world) {
                             if (old_grens == TRUE) {

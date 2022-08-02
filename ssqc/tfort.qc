@@ -699,6 +699,11 @@ void () TeamFortress_ShowTF = {
     sprint(self, PRINT_HIGH, "Concussion effect lasts ");
     sprint(self, PRINT_HIGH, ftos(cussgrentime));
     sprint(self, PRINT_HIGH, " seconds");
+    sprint(self, PRINT_HIGH, "Blast effect lasts ");
+    sprint(self, PRINT_HIGH, ftos(blastgrentime));
+    sprint(self, PRINT_HIGH, " seconds");
+    sprint(self, PRINT_HIGH, "Blast effect strength ");
+    sprint(self, PRINT_HIGH, ftos(blastgrenstrength));
 
     sprint(self, PRINT_HIGH, "\n== Scout ==\n");
     CF_PrintSetting("Scout dash ability", scoutdash, "", 1);
@@ -1284,13 +1289,8 @@ void (entity p) TeamFortress_SetSpeed = {
         p.maxfbspeed = PC_DEMOMAN_MAXSPEED;
         p.maxstrafespeed = PC_DEMOMAN_MAXSTRAFESPEED;
     } else if (p.playerclass == PC_MEDIC) {
-        if (medic_type == MEDIC_TYPE_BLAST) {
-            p.maxfbspeed = PC_BLASTMEDIC_MAXSPEED;
-            p.maxstrafespeed = PC_BLASTMEDIC_MAXSTRAFESPEED;
-        } else {
-            p.maxfbspeed = PC_MEDIC_MAXSPEED;
-            p.maxstrafespeed = PC_MEDIC_MAXSTRAFESPEED;
-        }
+        p.maxfbspeed = PC_MEDIC_MAXSPEED;
+        p.maxstrafespeed = PC_MEDIC_MAXSTRAFESPEED;
     } else if (p.playerclass == PC_HVYWEAP) {
         p.maxfbspeed = PC_HVYWEAP_MAXSPEED;
         p.maxstrafespeed = PC_HVYWEAP_MAXSTRAFESPEED;
@@ -1345,6 +1345,13 @@ void (entity p) TeamFortress_SetSpeed = {
             p.maxstrafespeed = 80;
         }
     }
+
+    if ((p.aircurve < 1) && !(p.flags & FL_ONGROUND)) {
+        p.maxfbspeed = p.maxfbspeed * p.aircurve;
+        p.maxstrafespeed = p.maxstrafespeed * p.aircurve;
+        p.maxspeed = p.maxspeed * p.aircurve;
+    }
+
     sp = ftos(p.maxfbspeed);
     stuffcmd(p, "cl_backspeed ");
     stuffcmd(p, sp);
@@ -1570,6 +1577,7 @@ void () TeamFortress_SetEquipment = {
     self.is_feigning = 0;
     self.is_unabletospy = 0;
     self.is_concussed = 0;
+    self.aircurve = 1;
     self.disguise_skin = 0;
     self.disguise_team = 0;
     self.detpack_left = 0;
@@ -2402,6 +2410,7 @@ void () TeamFortress_RemoveTimers = {
 
     self.leg_damage = 0;
     self.is_concussed = 0;
+    self.aircurve = 1;
     self.is_undercover = 0;
 
     if (self.is_building && engineer_move) {

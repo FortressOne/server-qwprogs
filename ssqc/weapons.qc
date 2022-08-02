@@ -8,6 +8,7 @@ void (vector org, float damage) SpawnBlood;
 void () SuperDamageSound;
 
 void () ConcussionGrenadeTimer;
+void () BlastGrenadeTimer;
 void () OldConcussionGrenadeTimer;
 
 void (float inp) W_ChangeWeapon;
@@ -427,10 +428,12 @@ float () W_FireMedikit = {
 
                 healam = 200;
                 te = find(world, classname, "timer");
+
                 while (((te.owner != trace_ent)
-                        || ((te.think != ConcussionGrenadeTimer)
-                            && (te.think != OldConcussionGrenadeTimer)))
-                       && (te != world))
+                            || ((te.think != ConcussionGrenadeTimer)
+                                && (te.think != OldConcussionGrenadeTimer)
+                                && (te.think != BlastGrenadeTimer)))
+                        && (te != world))
                     te = find(te, classname, "timer");
 
                 if (te != world) {
@@ -448,6 +451,7 @@ float () W_FireMedikit = {
 
                     dremove(te);
                 }
+
                 if (trace_ent.tfstate & TFSTATE_HALLUCINATING) {
 
                     te = find(world, classname, "timer");
