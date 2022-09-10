@@ -112,6 +112,7 @@ void() CSQC_Parse_Event = {
             ApplyTransparencyToGrenTimer();
             break;
         case MSG_PLAYERDIE:
+            last_death_time = readfloat();
             StopGrenTimers();
             break;
         case MSG_CLIENT_MENU:
@@ -329,8 +330,13 @@ void PlayGrenTimer(float offset) {
     soundupdate(self, channel, sound, cvar(FOCMD_GRENTIMERVOLUME), 0, 0, 0, offset);
 }
 
-void ParseGrenPrimed(float grentype, float timertype) {
-    if(timertype == 0) {
+void ParseGrenPrimed(float grentype, float primetime) {
+    local float timertype = cvar(FOCMD_GRENTIMER);
+
+    if (primetime < last_death_time)
+        return;
+
+    if (timertype == 0) {
         AddSilentGrenTimer(grentype, 0);
         return;
     }

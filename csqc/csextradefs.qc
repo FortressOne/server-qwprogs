@@ -542,6 +542,7 @@ float grentimer_waiting;
 float jumpsound_cooldown;
 float last_pmove_onground;
 float last_vel_z;
+float last_death_time;
 
 vector FO_Hud_Icon_Size = [24, 24, 0];
 vector FO_Hud_Icon_Font_Size = [8, 8, 0];
