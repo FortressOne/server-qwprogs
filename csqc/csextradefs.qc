@@ -520,6 +520,12 @@ enum {
 #define FOCMD_JUMPVOLUME "fo_jumpvolume"
 #define FOCMD_ADMIN_MENU_UPDATE_TIME "fo_adminrefresh"
 #define FOCMD_FTE_HUD "fo_fte_hud"
+#define FOCMD_LEGACY_SBAR "fo_legacy_sbar"
+
+struct fo_settings {
+    float fte_hud;
+    float legacy_sbar;
+} settings;
 
 float team_no;
 float is_spectator;

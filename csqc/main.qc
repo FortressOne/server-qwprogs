@@ -19,6 +19,21 @@ void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
 }
 
+float last_cvar_update;
+void Update_Cached_CVars() {
+    // This is a little unfortunate, but there there doesn't appear to be an
+    // edge that can be captured (cvars do not count as commands), so we poll
+    // reasonably frequently (10hz).  This is a significant improvement versus
+    // reading them in the render path.
+    if (time - last_cvar_update < 0.1)
+        return;
+    last_cvar_update = time;
+
+    settings.fte_hud = cvar(FOCMD_FTE_HUD) == 1;
+    settings.legacy_sbar = cvar(FOCMD_LEGACY_SBAR) == 1;
+}
+
+
 noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     print("CSQC Started\n");
 
@@ -41,6 +56,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercvar(FOCMD_JUMPVOLUME, "1");
     registercvar(FOCMD_OLDSCOREBOARD, "0");
     registercvar(FOCMD_FTE_HUD, "0");
+    registercvar(FOCMD_LEGACY_SBAR, "0");
 
     registercommand("fo_menu_game");
     registercommand("fo_main_menu");
@@ -107,6 +123,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     current_vote = world;
     vote_list_filter = "";
     MouseDown = 0;
+
+    Update_Cached_CVars();
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -122,9 +140,10 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
     setproperty(VF_DRAWCROSSHAIR, 1);		 // we want to draw our crosshair!
-    if(cvar(FOCMD_FTE_HUD) != 1) {
-        setproperty(VF_DRAWENGINESBAR, 1);		/* boolean. If set to 1, the sbar will be drawn, and viewsize will be honoured automatically. */
-    }
+
+    // Draw original sbar, viewsize honoured automatically.
+    if (!settings.fte_hud || settings.legacy_sbar)
+        setproperty(VF_DRAWENGINESBAR, 1);
 
     addentities((intermission?0:MASK_VIEWMODEL)|MASK_ENGINE); 		// add entities with these rendermask field var's to our view
 
@@ -264,14 +283,14 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                     localcmd(sprintf("bind %s +fo_showscores\n", key2));
                 }
             }
-            if(cvar(FOCMD_FTE_HUD)) {
+            if(settings.fte_hud) {
                 FO_Show_Scores(TRUE);
             }
             break;
         case "-showscores":
         case "-showteamscores":
             showingscores = FALSE;
-            if(cvar(FOCMD_FTE_HUD)) {
+            if(settings.fte_hud) {
                 FO_Show_Scores(FALSE);
             }
             break;
@@ -518,6 +537,7 @@ void _Sync_ClientCommandFrame() {
 // Called for each {client, server} command frame, ensures globals are
 // synchronized with server and predicted state.
 void Sync_GameState() {
+    Update_Cached_CVars();
     _Sync_ServerCommandFrame();
     _Sync_ClientCommandFrame();
 }

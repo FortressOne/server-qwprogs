@@ -148,7 +148,9 @@ void(string panelid, float display, string text) drawGrenTimerPanel = {
 };
 
 void(string panelid, float display, string text) drawFacePanel = {
-    if(!cvar(FOCMD_FTE_HUD)) return;
+    if (!settings.fte_hud)
+        return;
+
     local float playerclass = SBAR.PlayerClass; //we could add different faces per class?
 
     local string icon = FaceInvisibleInvulnerableIcon.icon;
@@ -185,7 +187,9 @@ void(string panelid, float display, string text) drawFacePanel = {
 };
 
 void(string panelid, float display, string text) drawArmourPanel = {
-    if(!cvar(FOCMD_FTE_HUD)) return;
+    if(!settings.fte_hud)
+        return;
+
     local float playerclass = SBAR.PlayerClass;
 
     local string icon = fo_hud_editor?ArmourIcons[1].icon:"";
@@ -202,7 +206,9 @@ void(string panelid, float display, string text) drawArmourPanel = {
 };
 
 void(string panelid, float display, string text) drawAmmoPanel = {
-    if(!cvar(FOCMD_FTE_HUD)) return;
+    if(!settings.fte_hud)
+        return;
+
     local string icon = fo_hud_editor?AmmoIcons[0].icon:"";
     
     local float items = getstatf(STAT_ITEMS);
@@ -215,7 +221,9 @@ void(string panelid, float display, string text) drawAmmoPanel = {
 };
 
 void(string panelid, float display, string text) drawInvIconPanel = {
-    if(!cvar(FOCMD_FTE_HUD)) return;
+    if(!settings.fte_hud)
+        return;
+
     if(text && text != "") {
         drawIconPanel(panelid, display, "", text);
     } else if(fo_hud_editor) {
@@ -223,19 +231,27 @@ void(string panelid, float display, string text) drawInvIconPanel = {
     }
 };
 void(string panelid, float display, string text) drawInvShellsPanel = {
-    if(!cvar(FOCMD_FTE_HUD)) return;
+    if(!settings.fte_hud)
+        return;
+
     drawIconPanel(panelid, display, text, AmmoIcons[0].icon);
 };
 void(string panelid, float display, string text) drawInvNailsPanel = {
-    if(!cvar(FOCMD_FTE_HUD)) return;
+    if(!settings.fte_hud)
+        return;
+
     drawIconPanel(panelid, display, text, AmmoIcons[1].icon);
 };
 void(string panelid, float display, string text) drawInvRocketsPanel = {
-    if(!cvar(FOCMD_FTE_HUD)) return;
+    if(!settings.fte_hud)
+        return;
+
     drawIconPanel(panelid, display, text, AmmoIcons[2].icon);
 };
 void(string panelid, float display, string text) drawInvCellsPanel = {
-    if(!cvar(FOCMD_FTE_HUD)) return;
+    if(!settings.fte_hud)
+        return;
+
     drawIconPanel(panelid, display, text, AmmoIcons[3].icon);
 };
 
@@ -280,17 +296,23 @@ void(string panelid, float display, string text, float threshold) drawBigNumberP
 };
 
 void(string panelid, float display, string text) drawHealthTextPanel = {
-    if(!cvar(FOCMD_FTE_HUD)) return;
+    if(!settings.fte_hud)
+        return;
+
     drawBigNumberPanel(panelid, display, text, 26);
 };
 
 void(string panelid, float display, string text) drawAmmoTextPanel = {
-    if(!cvar(FOCMD_FTE_HUD)) return;
+    if(!settings.fte_hud)
+        return;
+
     drawBigNumberPanel(panelid, display, text, 11);
 };
 
 void(string panelid, float display, string text) drawClockPanel = {
-    if(!cvar(FOCMD_FTE_HUD)) return;
+    if(!settings.fte_hud)
+        return;
+
     drawBigNumberPanel(panelid, display, text, 0);
 };
 
@@ -1137,7 +1159,7 @@ var FO_Hud_Panel Hud_Panels[] = {
     {"gun6","Grenade Launcher",           '-4 -90',  '36 24',  0.8,1.4,1,0, drawInvIconPanel, {return getGunIcon(IT_GRENADE_LAUNCHER);}, 0, 36},
     {"gun7","Rocket Launcher",            '-4 -70',  '36 24',  0.8,1.4,1,0, drawInvIconPanel, {return getGunIcon(IT_ROCKET_LAUNCHER);}, 0, 36},
     {"gun8","Lighning Gun",               '-4 -50',  '36 24',  0.8,1.4,1,0, drawInvIconPanel, {return getGunIcon(IT_LIGHTNING);}, 0, 36},
-    {"speed","Speed",                     '4 15',    '26 26',  1,1.4,0,0, drawTextPanel, {return cvar(FOCMD_FTE_HUD)?sprintf("%3.1f UPS", speed):"";}, 0, 4},
+    {"speed","Speed",                     '4 15',    '26 26',  1,1.4,0,0, drawTextPanel, {settings.fte_hud ? sprintf("%3.1f UPS", speed) : "";}, 0, 4},
 };
 
 //var FO_Hud_Panel Hud_ExtraPanels[] = {
