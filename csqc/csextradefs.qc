@@ -436,14 +436,51 @@ typedef struct {
 } FO_Hud_Settings;
 FO_Hud_Settings HudSettings;
 
-typedef struct {
-    float grentype;
-    float expires;
-    float icon_index;
-    float alpha;
-} FO_Hud_Grentimer;
+enumflags {
+    FL_GT_SOUND,
+    FL_GT_THROWN,
+    FL_GT_ADJPING
+};
 
-FO_Hud_Grentimer FO_Hud_Grentimers[5];
+class CsGrenTimer;
+CsGrenTimer grentimers[NUM_GREN_TIMERS];
+
+class CsGrenTimer {
+    float primed_at_;
+    float expires_at_;
+    float flags_;
+    float channel_;
+    float grentype_;
+
+    nonvirtual float() active { return expires_at_ > time; };
+    nonvirtual float() expiry { return expires_at_; };
+    nonvirtual float() grentype { return grentype_; };
+    nonvirtual void() set_thrown { flags_ |= FL_GT_THROWN; };
+    nonvirtual float() is_thrown { return flags_ & FL_GT_THROWN; };
+
+    nonvirtual void(float primed_at, float expires_at,
+                    float grentype, float timer_flags) Set;
+    nonvirtual void() Stop;
+
+    static float next_index_;
+    static CsGrenTimer last_;
+
+    static void() Init {
+        for (float i = 0; i < grentimers.length; i++)
+            grentimers[i] = spawn(CsGrenTimer, channel_: CHAN_GREN_START + i);
+    };
+
+    static void() StopAll {
+        for (float i = 0; i < grentimers.length; i++)
+            grentimers[i].Stop();
+    };
+
+    static CsGrenTimer() GetNext {
+        return last_ = grentimers[next_index_++ % grentimers.length];
+    };
+
+    static CsGrenTimer() GetLast { return last_; };
+};
 
 // scoreboard stuff
 typedef struct {

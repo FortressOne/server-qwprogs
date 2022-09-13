@@ -101,7 +101,6 @@ void(string panelid, float display, string text) drawGrenTimerPanel = {
 
     if (display) {
         FO_Hud_Panel* panel = getAnyHudPanelByNamePointer(panelid);
-        
         float Scale = panel.Scale;
         float TextScale = panel.TextScale;
         FO_Hud_Panel panel2;
@@ -111,35 +110,27 @@ void(string panelid, float display, string text) drawGrenTimerPanel = {
         panel2.Display = panel.Display;
         panel2.FillSize = panel.FillSize;
 
-        for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
-            if(FO_Hud_Grentimers[i].grentype > 0) {
-                timeleft = floor(FO_Hud_Grentimers[i].expires - time) + 1;
-                if(timeleft < 1) {
-                    //Expire and fill the gap if there are any active grentimers afterwards
-                    FO_Hud_Grentimers[i].grentype = 0;
-                    for(float j = i + 1; j < FO_Hud_Grentimers.length; j++) {
-                        FO_Hud_Grentimers[j - 1].grentype = FO_Hud_Grentimers[j].grentype;
-                        FO_Hud_Grentimers[j - 1].expires = FO_Hud_Grentimers[j].expires;
-                        FO_Hud_Grentimers[j - 1].icon_index = FO_Hud_Grentimers[j].icon_index;
-                        FO_Hud_Grentimers[j - 1].alpha = FO_Hud_Grentimers[j].alpha;
-                    }
-                        FO_Hud_Grentimers[FO_Hud_Grentimers.length - 1].grentype = 0;
-                        FO_Hud_Grentimers[FO_Hud_Grentimers.length - 1].expires = 0;
-                        FO_Hud_Grentimers[FO_Hud_Grentimers.length - 1].icon_index = 0;
-                        FO_Hud_Grentimers[FO_Hud_Grentimers.length - 1].alpha = 0;
-                    continue;
-                }
+        for (float i = 0; i < grentimers.length; i++) {
+            local CsGrenTimer gt = grentimers[i];
 
-                if(i) {
-                    panel2.Scale = Scale * 0.8;
-                    panel2.TextScale = TextScale * 0.8;
-                }
+            if (!gt.active())
+                continue;
 
-                Hud_DrawPanelLMP(&panel2, ftos(timeleft), GrenadeIcons[FO_Hud_Grentimers[i].icon_index].icon, FO_Hud_Grentimers[i].alpha);
+            timeleft = floor(gt.expiry() - time) + 1;
+            if (timeleft < 1)
+                continue;
 
-                panel2.Position = panel2.Position + [0, panel2.FillSize.y * panel2.Scale];
-                timercount++;
+            if (timercount) {
+                panel2.Scale = Scale * 0.8;
+                panel2.TextScale = TextScale * 0.8;
             }
+
+            local float alpha = (gt.is_thrown()) ? 0.3 : 1.0;
+            Hud_DrawPanelLMP(&panel2, ftos(timeleft),
+                GrenadeIcons[gt.grentype()].icon, alpha);
+            panel2.Position = panel2.Position +
+                [0, panel2.FillSize.y * panel2.Scale];
+            timercount++;
         }
     }
     if(fo_hud_editor && (!display || !timercount)) {

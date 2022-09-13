@@ -10,7 +10,6 @@ void Hud_WriteCfg(string path);
 void FO_LoadSettings();
 void FO_WriteSettings();
 void AddGrenTimer(float grentype, float offset);
-void ApplyTransparencyToGrenTimer();
 void StopGrenTimers();
 float IsValidToUseGrenades();
 void Sync_GameState();
@@ -27,6 +26,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 //     for (float i = 0; i < HudIcons.length; i++) {
 //         precache_pic(HudIcons[i].icon);
 //     }
+
+    CsGrenTimer::Init();
 
     registercommand("fo_hud_editor");
     registercommand("fo_hud_reload");
@@ -446,29 +447,6 @@ float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
 
 void CSQC_Shutdown() = {
     FO_WriteSettings();
-}
-
-void ApplyTransparencyToGrenTimer() {
-    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
-        if (FO_Hud_Grentimers[i].grentype != 0 && FO_Hud_Grentimers[i].alpha != 0.3) {
-            FO_Hud_Grentimers[i].alpha = 0.3;
-            break;
-        }
-    }
-}
-
-void StopGrenTimers() {
-    soundupdate(self, CHAN_GREN1, "", 0, 0, 0, 0, 0);
-    soundupdate(self, CHAN_GREN2, "", 0, 0, 0, 0, 0);
-    soundupdate(self, CHAN_GREN3, "", 0, 0, 0, 0, 0);
-    soundupdate(self, CHAN_GREN4, "", 0, 0, 0, 0, 0);
-    soundupdate(self, CHAN_GREN5, "", 0, 0, 0, 0, 0);
-
-    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
-        FO_Hud_Grentimers[i].grentype = 0;
-        FO_Hud_Grentimers[i].expires = 0;
-        FO_Hud_Grentimers[i].icon_index = 0;
-    }
 }
 
 float last_servercommandframe;

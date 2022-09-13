@@ -1491,7 +1491,7 @@ void () spawn_guard_think = {
                 if(!te.has_disconnected && infokey(te, "dap") == "1") {
                     oldself = self;
                     self = te;
-                    TeamFortress_PrimeGrenade(1);
+                    TeamFortress_PrimeGrenade(1, FALSE);
                     self = oldself;
                 }
                 te = find (te, classname, "player");

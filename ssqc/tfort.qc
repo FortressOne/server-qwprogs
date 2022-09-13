@@ -790,6 +790,7 @@ void () GrenadeTimer = {
 void (entity timer) FO_SpawnThrownGrenade = {
     local entity user = timer.owner;
     user.tfstate &= ~(TFSTATE_GRENPRIMED | TFSTATE_GRENTHROWING);
+    user.last_throw = time;
 
     if (grentimers && infokeyf(user, INFOKEY_P_CSQCACTIVE)) {
         UpdateClientGrenadeThrown(user);
@@ -923,7 +924,7 @@ void (float inp) TeamFortress_PrimeThrowGrenade = {
         (self.tfstate & TFSTATE_GRENTHROWING))
         TeamFortress_ThrowGrenade();
     else {
-        TeamFortress_PrimeGrenade(inp);
+        TeamFortress_PrimeGrenade(inp, TRUE);
 
     if ( ((inp == 1 && self.tp_grenade_switch != 1) || (inp == 2 && self.tp_grenade_switch == 1))
                 && self.tp_grenades_1 == GR_TYPE_CALTROP)
@@ -935,7 +936,9 @@ void () TeamFortress_GrenadePrimedThink;
 void () FO_PreciseGrenadeThink;
 float () FO_UsePreciseGrenades;
 
-void (float inp) TeamFortress_PrimeGrenade = {
+// is_player defines whether this originated from the player or server.  Player
+// generated primes are corrected for latency when project_grenades is on.
+void (float inp, float is_player) TeamFortress_PrimeGrenade = {
     local float gtype;
     local string gs;
     local string ptime;
@@ -1098,12 +1101,14 @@ void (float inp) TeamFortress_PrimeGrenade = {
         tGrenade.impulse = TF_GRENADE_1;
     else if (inp == 2)
         tGrenade.impulse = TF_GRENADE_2;
-    tGrenade.nextthink = time + 0.8;
 
+    local float lag_adjust = is_player ? AL_GrenadeOffset() : 0;
+
+    tGrenade.nextthink = time + 0.8 - lag_adjust;
     if (gtype == GR_TYPE_CALTROP)
-        tGrenade.heat = time + 0.5 + 0.5;
+        tGrenade.heat = time + 0.5 + 0.5 - lag_adjust;
     else {
-        tGrenade.heat = time + 3 + 0.8;
+        tGrenade.heat = time + 3 + 0.8 - lag_adjust;
 
         RemoveGrenadeTimers();
 
@@ -1111,7 +1116,7 @@ void (float inp) TeamFortress_PrimeGrenade = {
         local float notimers = stof(infokey(self, "nt"));
         if (grentimers && notimers != 1) {
             timer = spawn();
-            timer.nextthink = time + 0.8;
+            timer.nextthink = time + 0.8 - lag_adjust;
             timer.think = GrenadeTimer;
             timer.heat = 4;
             timer.owner = self;
@@ -1121,7 +1126,7 @@ void (float inp) TeamFortress_PrimeGrenade = {
             }
         }
         if (grentimers && csqcactive) {
-            UpdateClientGrenadePrimed(self, gtype);
+            UpdateClientGrenadePrimed(self, gtype, tGrenade.heat);
         }
     }
 

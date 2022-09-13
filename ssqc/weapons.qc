@@ -30,7 +30,7 @@ void () TeamFortress_ShowTF;
 void () TeamFortress_AssaultWeapon;
 void () TeamFortress_IncendiaryCannon;
 void () TeamFortress_FlameThrower;
-void (float inp) TeamFortress_PrimeGrenade;
+void (float inp, float is_player) TeamFortress_PrimeGrenade;
 void () TeamFortress_ThrowGrenade;
 void (float inp) TeamFortress_PrimeThrowGrenade;
 void () TeamFortress_GrenadeSwitch;
@@ -3020,9 +3020,9 @@ void () ImpulseCommands = {
 
     if (!self.is_feigning) {
         if (self.impulse == TF_GRENADE_1)
-            TeamFortress_PrimeGrenade(1);
+            TeamFortress_PrimeGrenade(1, TRUE);
         else if (self.impulse == TF_GRENADE_2)
-            TeamFortress_PrimeGrenade(2);
+            TeamFortress_PrimeGrenade(2, TRUE);
         else if (self.impulse == TF_GRENADE_T)
             TeamFortress_ThrowGrenade();
         else if (self.impulse == TF_GRENADE_PT_1)
@@ -3510,7 +3510,7 @@ void () ButtonFrame = {
     // +grenade1 keydown frame
     if (keydowns & BUTTON5) {
         if (hold_grens) {
-            TeamFortress_PrimeGrenade(1);
+            TeamFortress_PrimeGrenade(1, TRUE);
         } else {
             TeamFortress_PrimeThrowGrenade(1);
         }
@@ -3526,7 +3526,7 @@ void () ButtonFrame = {
     // +grenade2 keydown frame
     if (keydowns & BUTTON6) {
         if (hold_grens) {
-            TeamFortress_PrimeGrenade(2);
+            TeamFortress_PrimeGrenade(2, TRUE);
         } else {
             TeamFortress_PrimeThrowGrenade(2);
         }

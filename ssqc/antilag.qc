@@ -27,3 +27,20 @@ void AL_ProjectProjectile (entity projectile) {
 
       setorigin(projectile, projected_origin);
 }
+
+float AL_GrenadeOffset() {
+    if (!CF_GetSetting("pg", "project_grenades", "off"))
+        return 0;
+
+    local float offset = infokeyf(self, INFOKEY_P_PING) / 1000;
+    local float smallest_grenade_think = 0.5;
+
+    offset /= 2;
+    // Make sure we'll always order before first think.
+    offset = min(offset, smallest_grenade_think - 0.1);
+
+    // Don't allow prime to move before throw (or to the same frame).
+    offset = min(offset, time - (self.last_throw + 0.013));
+
+    return offset;
+}

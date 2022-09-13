@@ -1,10 +1,6 @@
 void ParseSBAR();
-void ParseGrenPrimed(float grentype, float timertype);
-void AddGrenTimer(float grentype, float offset);
-void AddSilentGrenTimer(float grentype, float offset);
-void StartGrenTimer(float slot, float grentype, float offset);
-void AddGrenTimer(float grentype, float offset);
-void PlayGrenTimer(float offset);
+void ParseGrenPrimed(float grentype, float primed_at, float explodes_at);
+float StartGrenTimer(float primed_at, float expires_at, float grentype, float play_sound);
 
 void() CSQC_Parse_Event = {
     float msgtype = readbyte();
@@ -104,12 +100,15 @@ void() CSQC_Parse_Event = {
             SBAR.Identify = readstring();
             break;
         case MSG_GRENPRIMED:
-            float grentype = readfloat();
-            float timertype = cvar(FOCMD_GRENTIMER);
-            ParseGrenPrimed(grentype, timertype);
+            float grentype = readbyte();
+            float primed_at = readfloat();
+            float explodes_at = readfloat();
+            ParseGrenPrimed(grentype, primed_at, explodes_at);
             break;
         case MSG_GRENTHROWN:
-            ApplyTransparencyToGrenTimer();
+            CsGrenTimer last = CsGrenTimer::GetLast();
+            last.set_thrown();
+            //CsGrenTimer::GetLast().set_thrown();
             break;
         case MSG_PLAYERDIE:
             last_death_time = readfloat();
@@ -306,51 +305,56 @@ void() CSQC_Parse_Event = {
     }
 }
 
-void PlayGrenTimer(float offset) {
-    local float channel = CHAN_GREN1;
-    local float soundtime;
-    local float highest_soundtime = -1;
+void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
+                      float timer_flags) {
+    grentype_ = _grentype;
+    primed_at_ = primed_at;
+    expires_at_ = expires_at;
+    flags_ = timer_flags;
 
-    for(float i = CHAN_GREN1; i <= CHAN_GREN5; i++) {
-        soundtime = getsoundtime(self, i);
-
-        if (soundtime < 0) {
-            channel = i;
-            break;
-        }
-
-        if (soundtime > highest_soundtime) {
-            highest_soundtime = soundtime;
-            channel = i;
-        }
+    if (this.flags_ & FL_GT_ADJPING) {
+        local float rtt =
+            getplayerkeyfloat(player_localnum, INFOKEY_P_PING) / 1000;
+        expires_at_ -= rtt/2;
     }
 
-    local string sound = cvar_string(FOCMD_GRENTIMERSOUND);
-    localsound(sound, channel, cvar(FOCMD_GRENTIMERVOLUME)); // required because soundupdate doesn't reset getsoundtime
-    soundupdate(self, channel, sound, cvar(FOCMD_GRENTIMERVOLUME), 0, 0, 0, offset);
+    if !(this.flags_ & FL_GT_SOUND)
+        return;
+
+    local float adj = 3.8 - (expires_at_ - time);
+    string sound = cvar_string(FOCMD_GRENTIMERSOUND);
+    soundupdate(self, channel_, cvar_string(FOCMD_GRENTIMERSOUND),
+            cvar(FOCMD_GRENTIMERVOLUME), 0, 0, 0, adj);
 }
 
-void ParseGrenPrimed(float grentype, float primetime) {
-    local float timertype = cvar(FOCMD_GRENTIMER);
+void CsGrenTimer::Stop() {
+    expires_at_ = -1;
+    if (flags_ & FL_GT_SOUND)
+        soundupdate(self, channel_, "", -1, 0, 0, 0, 0);  // -ve volume => stop.
+    flags_ = 0;
+}
 
-    if (primetime < last_death_time)
+void StopGrenTimers() {
+    for (float i = 0; i < NUM_GREN_TIMERS; i++)
+        grentimers[i].Stop();
+}
+
+void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
+    if (grentype == GR_TYPE_FLARE || grentype == GR_TYPE_CALTROP)
         return;
 
-    if (timertype == 0) {
-        AddSilentGrenTimer(grentype, 0);
+    if (primed_at < last_death_time)
         return;
+
+    local float timer_flags = 0;
+    switch (cvar(FOCMD_GRENTIMER)) {
+        case 0: break;
+        case 1: timer_flags = FL_GT_SOUND; break;
+        // 2 [and something sane for anything we don't recognize.]
+        default: timer_flags = FL_GT_SOUND | FL_GT_ADJPING; break;
     }
-
-    if(timertype == 1) {
-        AddGrenTimer(grentype, 0);
-        return;
-    }
-
-    if(timertype == 2) {
-        local float offset = getplayerkeyfloat(player_localnum, INFOKEY_P_PING)/1000;
-        AddGrenTimer(grentype, offset);
-        return;
-    }
+    CsGrenTimer timer = CsGrenTimer::GetNext();
+    timer.Set(primed_at, explodes_at, grentype, timer_flags);
 }
 
 void ParseSBAR()
