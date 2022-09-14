@@ -1,4 +1,9 @@
-../csprogs.dat
+#pragma target fte_5768
+#pragma optimise 3
+
+#pragma progs_dat "../csprogs.dat"
+
+#includelist
 csdefs.qc
 csextradefs.qc
 
@@ -15,3 +20,4 @@ hud_helpers.qc
 hud.qc
 settings.qc
 input.qc
+#endlist

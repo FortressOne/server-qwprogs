@@ -1,6 +1,6 @@
+#pragma optimise 3
+// Menu code does not appear to be compatible with target fte_5768.
 #pragma progs_dat "../menu.dat"
-
-//#pragma target fte
 
 #define MENU		//select the module
 

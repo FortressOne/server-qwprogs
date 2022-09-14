@@ -1,6 +1,10 @@
-../qwprogs.dat
+#pragma target fte_5768
+#pragma optimise 3
+#pragma progs_dat "../qwprogs.dat"
 
-#define QWSSQC 
+#define QWSSQC
+
+#includelist
 ../share/fteextensions.qc
 defs.qc
 ../share/commondefs.qc
@@ -65,3 +69,4 @@ rotate.qc
 fo_logic.qc
 fo_math.qc
 fo_misc_info.qc
+#endlist
