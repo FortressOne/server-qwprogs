@@ -241,8 +241,6 @@ float coop;
 .float last_saveme_sound;
 
 .float no_active_nail_grens;
-.float no_active_napalm_grens;
-.float no_active_gas_grens;
 
 /*======================================================================*/
 /* TEAMFORTRESS GOALS							*/

@@ -872,7 +872,7 @@ void (entity timer) FO_SpawnThrownGrenade = {
         FO_SetModel(newmis, "progs/biggren.mdl");
     } else if (timer.weapon == GR_TYPE_NAPALM) {
         newmis.touch = NapalmGrenadeTouch;
-        newmis.think = NapalmGrenadeExplode;
+        newmis.think = NapalmGrenadeExplode1;
         newmis.grenadename = "napalmgrenade";
         newmis.skin = 2;
         newmis.avelocity = '0 300 0';
@@ -888,7 +888,7 @@ void (entity timer) FO_SpawnThrownGrenade = {
         FO_SetModel(newmis, "progs/flare.mdl");
     } else if (timer.weapon == GR_TYPE_GAS) {
         newmis.touch = GasGrenadeTouch;
-        newmis.think = GasGrenadeExplode;
+        newmis.think = GasGrenadeExplode1;
         newmis.grenadename = "gasgrenade";
         newmis.skin = 3;
         newmis.avelocity = '300 300 300';
@@ -2488,7 +2488,7 @@ void () TeamFortress_RemoveTimers = {
 
     te = find(world, classname, "timer");
     while (te != world) {
-        if ((te.owner == self) && (te.no_active_gas_grens <= 0)) {
+        if (te.owner == self) {
             dremove(te);
             te = find(world, classname, "timer");
         } else
@@ -2500,15 +2500,6 @@ void () TeamFortress_RemoveTimers = {
     RemovePrimeTimers();
     self.StatusGrenTime = 0;
     Status_Refresh(self);
-
-    te = find(world, classname, "grentimer");
-    while (te != world) {
-        if ((te.owner == self) && (te.no_active_napalm_grens <= 0)) {
-            dremove(te);
-            te = find(world, classname, "grentimer");
-        } else
-            te = find(te, classname, "grentimer");
-    }
 
     te = find(world, classname, "item_tfgoal");
     while (te) {
@@ -3006,7 +2997,7 @@ void () TeamFortress_ExplodePerson = {
         FO_SetModel(newmis, "progs/biggren.mdl");
     } else if (self.weapon == GR_TYPE_NAPALM) {
         newmis.touch = NapalmGrenadeTouch;
-        newmis.think = NapalmGrenadeExplode;
+        newmis.think = NapalmGrenadeExplode1;
         newmis.grenadename = "napalmgrenade";
         newmis.skin = 2;
         newmis.avelocity = '0 300 0';
@@ -3026,7 +3017,7 @@ void () TeamFortress_ExplodePerson = {
         return;
     } else if (self.weapon == GR_TYPE_GAS) {
         newmis.touch = GasGrenadeTouch;
-        newmis.think = GasGrenadeExplode;
+        newmis.think = GasGrenadeExplode1;
         newmis.grenadename = "gasgrenade";
         newmis.skin = 2;
         newmis.avelocity = '300 300 300';

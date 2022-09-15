@@ -1,5 +1,5 @@
 void ParseSBAR();
-void ParseGrenPrimed(float grentype, float timertype);
+void ParseGrenPrimed(float grentype, float primetime);
 void AddGrenTimer(float grentype, float offset);
 void AddSilentGrenTimer(float grentype, float offset);
 void StartGrenTimer(float slot, float grentype, float offset);
@@ -105,13 +105,14 @@ void() CSQC_Parse_Event = {
             break;
         case MSG_GRENPRIMED:
             float grentype = readfloat();
-            float timertype = cvar(FOCMD_GRENTIMER);
-            ParseGrenPrimed(grentype, timertype);
+            float primetime = readfloat();
+            ParseGrenPrimed(grentype, primetime);
             break;
         case MSG_GRENTHROWN:
             ApplyTransparencyToGrenTimer();
             break;
         case MSG_PLAYERDIE:
+            last_death_time = readfloat();
             StopGrenTimers();
             break;
         case MSG_CLIENT_MENU:
@@ -329,21 +330,32 @@ void PlayGrenTimer(float offset) {
     soundupdate(self, channel, sound, cvar(FOCMD_GRENTIMERVOLUME), 0, 0, 0, offset);
 }
 
-void ParseGrenPrimed(float grentype, float timertype) {
-    if(timertype == 0) {
+void ParseGrenPrimed(float grentype, float primetime) {
+    local float timertype = cvar(FOCMD_GRENTIMER);
+
+    if (primetime < last_death_time)
+        return;
+
+    if (timertype == 0) {
         AddSilentGrenTimer(grentype, 0);
-        return;
-    }
-
-    if(timertype == 1) {
+    } else if(timertype == 1) {
         AddGrenTimer(grentype, 0);
-        return;
-    }
+    } else if (timertype == 2) {
+        // We need to offset our sound by 2 RTT/2s:
+        //  The first is the already occurred delay to receive notification.
+        //  The second is the will-occur delay in sending throwgren back.
+        local float offset = getplayerkeyfloat(player_localnum,
+            INFOKEY_P_PING)/1000;
 
-    if(timertype == 2) {
-        local float offset = getplayerkeyfloat(player_localnum, INFOKEY_P_PING)/1000;
         AddGrenTimer(grentype, offset);
-        return;
+    } else if (timertype == 3) {
+        // As above, but uses precise accounting for the already occurred delay.
+        // Will eventually replace type==2.
+        local float offset_prime = time - primetime;
+        local float offset_throw = getplayerkeyfloat(player_localnum,
+            INFOKEY_P_PING)/1000 / 2;
+
+        AddGrenTimer(grentype, offset_prime + offset_throw);
     }
 }
 
@@ -444,14 +456,18 @@ void ParseSBAR()
 }
 
 float(float entnum, float channel, string soundname, float vol, float attenuation, vector pos, float pitchmod) CSQC_Event_Sound = {
-    if !(entnum == player_localentnum)
+    // Filter out sounds we may have generated locally, unless we're just
+    // pretending to be that entity.
+    if (entnum != player_localentnum || is_spectator || is_observer)
         return 0;
 
     switch(soundname) {
         case "player/plyrjmp8.wav":
         case "player/land.wav":
         case "player/land2.wav":
-            return 1;
+        case "player/h2ojump.wav":
+            if (autocvar(fo_csjumpsounds, 1, "client-side predicted jump sounds"))
+                return 1;
     }
 
     return 0;

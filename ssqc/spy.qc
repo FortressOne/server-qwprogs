@@ -1,7 +1,6 @@
 void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer;
 void (entity spy) TeamFortress_SpyCalcName;
 void () CF_Spy_UndercoverThink;
-void () GasGrenadeMakeGas;
 void () T_TranqDartTouch;
 void () Spy_DropBackpack;
 void (entity targ, entity attacker) KillSound;
@@ -1084,22 +1083,20 @@ void () GasGrenadeTouch = {
         self.avelocity = '0 0 0';
 };
 
-void () GasGrenadeExplode = {
-    local entity te;
+void () GasGrenadeExplode2;
+
+// GasGrenadeExplode1 handles the initial "pre-explosion".
+// GasGrenadeExplode2 handles aoe emission.
+void () GasGrenadeExplode1 = {
     local float pos;
 
     pos = pointcontents(self.origin);
     if (pos == -1) {
-        te = spawn();
-        te.think = GasGrenadeMakeGas;
-        te.nextthink = time + 0.1;
-        te.classname = "gastimer";
-        te.heat = 0;
-        te.origin = self.origin;
-        te.owner = self.owner;
-        te.team_no = self.owner.team_no;
-        te.weapon = 0;
-        te.enemy = self;
+        self.think = GasGrenadeExplode2;
+        self.nextthink = time + 0.1;
+        self.heat = 0;
+        self.dimension_seen = DMN_INVISIBLE;
+        self.movetype = MOVETYPE_NONE;
     } else {
         pos = 0;
         while (pos < 10) {
@@ -1118,31 +1115,14 @@ void () GasGrenadeExplode = {
             setsize(newmis, '-8 -8 -8', '8 8 8');
             pos = pos + 1;
         }
+        dremove(self);
     }
-    dremove(self);
 };
 
-void () GasGrenadeMakeGas = {
+void () GasGrenadeExplode2 = {
     local entity te;
     local entity timer;
 
-    if (self.heat == 0) {
-        self.owner.no_active_gas_grens =
-            self.owner.no_active_gas_grens + 1;
-        if (self.owner.no_active_gas_grens > 2) {
-            te = find(world, classname, "gastimer");
-            while (te) {
-                if ((te.owner == self.owner) &&
-                        (te.no_active_gas_grens == 1)) {
-                    te.weapon = 24;
-                    te.think = RemoveGrenade;
-                    te.nextthink = time + 0.1;
-                }
-                te = find(te, classname, "gastimer");
-            }
-        }
-        self.no_active_gas_grens = self.owner.no_active_gas_grens;
-    }
     self.nextthink = time + 0.75;
     te = findradius(self.origin, 200);
     while (te != world) {
@@ -1223,7 +1203,7 @@ void () GasGrenadeMakeGas = {
             self.weapon = 0;
         return;
     }
-    RemoveGrenade();
+    dremove(self);
 };
 
 void () HallucinationTimer = {

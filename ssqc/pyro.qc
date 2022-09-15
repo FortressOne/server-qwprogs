@@ -134,7 +134,23 @@ void () NapalmGrenadeTouch = {
         self.avelocity = '0 0 0';
 };
 
-void () NapalmGrenadeNetThink = {
+void () NapalmGrenadeExplode2;
+
+// Explode1 is the initial "flare" before we start emitting dmg.
+// Explode2 handles the subsequent explosions.
+void () NapalmGrenadeExplode1 = {
+    local entity head;
+
+    FO_Sound(self, CHAN_AUTO, "weapons/flmgrexp.wav", 1, ATTN_NORM);
+    traceline(self.origin, self.origin, 1, self);
+    if (trace_inwater != 1)
+        self.effects = self.effects | EF_DIMLIGHT;
+    self.think = NapalmGrenadeExplode2;
+    self.nextthink = time + 0.1;
+    self.heat = 0;
+};
+
+void () NapalmGrenadeExplode2 = {
     local entity head;
     local entity te;
 
@@ -153,81 +169,44 @@ void () NapalmGrenadeNetThink = {
             break;
     }
 
-    if (self.heat == 0) {
-        self.owner.no_active_napalm_grens =
-            self.owner.no_active_napalm_grens + 1;
-        if (self.owner.no_active_napalm_grens > 2) {
-            te = find(world, classname, "grentimer");
-            while (te) {
-                if ((te.owner == self.owner) &&
-                    (te.no_active_napalm_grens == 1)) {
-                    te.weapon = DMSG_FLAME;
-                    te.think = RemoveGrenade;
-                    te.nextthink = time + 0.1;
-                }
-                te = find(te, classname, "grentimer");
-            }
-        }
-        self.no_active_napalm_grens = self.owner.no_active_napalm_grens;
-    }
     self.nextthink = time + 1;
-    self.origin = self.enemy.origin;
     makevectors(self.v_angle);
     traceline(self.origin, self.origin, 1, self);
-    if (trace_inwater == 1) {
+
+    local float ignited = self.effects & EF_DIMLIGHT;
+    if (trace_inwater == 1 && ignited) {
+        self.effects &= ~EF_DIMLIGHT;  // Extinguish.
         FO_Sound(self, CHAN_VOICE, "misc/vapeur2.wav", 1, ATTN_NORM);
-        RemoveGrenade();
-        return;
-    }
-    head = findradius(self.origin, 180);
-    while (head) {
-        if (head.takedamage) {
-            deathmsg = DMSG_FLAME;
-            
-            TF_T_Damage(head, self, self.owner, explodeDam, TF_TD_NOTTEAM,
-                        TF_TD_FIRE);
-            other = head;
-            Napalm_touch();
-            if (other.classname == "player") {
-                stuffcmd(other, "bf\nbf\n");
+    } else if (ignited) {
+        head = findradius(self.origin, 180);
+        while (head) {
+            if (head.takedamage) {
+                deathmsg = DMSG_FLAME;
+
+                TF_T_Damage(head, self, self.owner, explodeDam, TF_TD_NOTTEAM,
+                            TF_TD_FIRE);
+                other = head;
+                Napalm_touch();
+                if (other.classname == "player") {
+                    stuffcmd(other, "bf\nbf\n");
+                }
             }
+            head = head.chain;
         }
-        head = head.chain;
+        WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
+        WriteByte(MSG_MULTICAST, TE_EXPLOSION);
+        WriteCoord(MSG_MULTICAST, self.origin_x);
+        WriteCoord(MSG_MULTICAST, self.origin_y);
+        WriteCoord(MSG_MULTICAST, self.origin_z);
+        multicast(self.origin, MULTICAST_PHS);
     }
-    WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
-    WriteByte(MSG_MULTICAST, TE_EXPLOSION);
-    WriteCoord(MSG_MULTICAST, self.origin_x);
-    WriteCoord(MSG_MULTICAST, self.origin_y);
-    WriteCoord(MSG_MULTICAST, self.origin_z);
-    multicast(self.origin, MULTICAST_PHS);
 
     self.heat = self.heat + 1;
-    
+
     if (self.heat >= maxExplosions)
-        RemoveGrenade();
-};
-
-void () NapalmGrenadeExplode = {
-    local entity head;
-
-    FO_Sound(self, CHAN_AUTO, "weapons/flmgrexp.wav", 1, ATTN_NORM);
-    traceline(self.origin, self.origin, 1, self);
-    if (trace_inwater == 1) {
         dremove(self);
-        return;
-    }
-    self.effects = self.effects | EF_DIMLIGHT;
-    head = spawn();
-    head.think = NapalmGrenadeNetThink;
-    head.classname = "grentimer";
-    head.grenadename = "napalmfire";
-    head.nextthink = time + 0.1;
-    head.heat = 0;
-    head.origin = self.origin;
-    head.owner = self.owner;
-    head.team_no = self.owner.team_no;
-    head.enemy = self;
 };
+
 
 void (vector org, entity shooter) NapalmGrenadeLaunch = {
     local float xdir;

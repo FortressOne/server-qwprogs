@@ -71,6 +71,7 @@ New features
 * CSQC - fo_hud_reset resets HUD to defaults
 * CSQC - fo_hud_reload reloads last-saved hud configuration
 * CSQC - fo_hud_editor to move panels and save to config
+* CSQC - fo_csjumpsounds
 * `info_empblock` has a new field `goal_effects`. Setting it to 16 will prevent it from blocking emps if there is a wall between it and the explosion.
 * New map point entity `info_empblock` with `t_length` field that specifies its radius of effect. An EMP explosion within a range of one will not go through walls.
 * Server option for duelmode to allow draws on a double-ko `localinfo duel_allow_draw 1`/`localinfo dad 1` (default 1)

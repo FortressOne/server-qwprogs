@@ -803,6 +803,7 @@ void UpdateClientGrenadePrimed(entity pl, float grentype) = {
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_GRENPRIMED);
     WriteFloat(MSG_MULTICAST, grentype);
+    WriteFloat(MSG_MULTICAST, time);
     multicast('0 0 0', MULTICAST_ONE_R_NOSPECS);
 }
 
@@ -821,7 +822,8 @@ void UpdateClientPlayerDie(entity pl) = {
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_PLAYERDIE);
-    multicast('0 0 0', MULTICAST_ONE_NOSPECS);
+    WriteFloat(MSG_MULTICAST, time);
+    multicast('0 0 0', MULTICAST_ONE_R_NOSPECS);
 }
 
 void UpdateClientIDString(entity pl) {

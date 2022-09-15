@@ -3862,45 +3862,6 @@ void () SuperDamageSound = {
     return;
 };
 
-void () RemoveGrenade = {
-    local entity te;
-
-    if (self.no_active_napalm_grens > 0) {
-
-        self.no_active_napalm_grens = 0;
-        self.owner.no_active_napalm_grens =
-            self.owner.no_active_napalm_grens - 1;
-        if (self.owner.no_active_napalm_grens < 0)
-            self.owner.no_active_napalm_grens = 0;
-
-        te = find(world, classname, "grentimer");
-        while (te) {
-            if ((te.owner == self.owner) &&
-                    (te.no_active_napalm_grens > 0))
-                te.no_active_napalm_grens = te.no_active_napalm_grens - 1;
-            te = find(te, classname, "grentimer");
-        }
-        dremove(self.enemy);
-        dremove(self);
-    }
-    if (self.no_active_gas_grens > 0) {
-
-        self.no_active_gas_grens = 0;
-        self.owner.no_active_gas_grens =
-            self.owner.no_active_gas_grens - 1;
-        if (self.owner.no_active_gas_grens < 0)
-            self.owner.no_active_gas_grens = 0;
-
-        te = find(world, classname, "grentimer");
-        while (te) {
-            if ((te.owner == self.owner) && (te.no_active_gas_grens > 0))
-                te.no_active_gas_grens = te.no_active_gas_grens - 1;
-            te = find(te, classname, "grentimer");
-        }
-        dremove(self);
-    }
-};
-
 void () ToggleInvincibility = {
     if(self.tfstate & TFSTATE_INVINCIBLE) {
         self.items = self.items - (self.items & IT_INVULNERABILITY);

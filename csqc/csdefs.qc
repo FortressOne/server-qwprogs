@@ -55,6 +55,7 @@ float input_impulse;
 void end_sys_globals;
 float pmove_onground;
 vector pmove_vel;
+vector pmove_org;
 .float modelindex;
 .vector absmin;
 .vector absmax;

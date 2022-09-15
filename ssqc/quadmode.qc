@@ -518,12 +518,6 @@ void () StartQuadRound =
 		gren.nextthink = (time + 0.1);
 		gren = find(gren, classname, "grenade");
 	}
-	gren = find(world, classname, "grentimer");
-	while (gren) {
-		gren.think = SUB_Remove;
-		gren.nextthink = (time + 0.1);
-		gren = find(gren, classname, "grentimer");
-	}
 	te = find(world, classname, "detpack");
 	while (te){
 		if (te.weaponmode == 1) {
