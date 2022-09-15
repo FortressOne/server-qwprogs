@@ -112,7 +112,11 @@ noref void() CSQC_WorldLoaded = {
     localcmd("menu_restart\n");
 }
 
+float current_pmove_onground;
+float current_pmove_vel_z;
+
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
+
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
     setproperty(VF_DRAWCROSSHAIR, 1);		 // we want to draw our crosshair!
@@ -131,6 +135,11 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     Menu_Draw(width, height, menushown);
     Hud_Draw(width, height);
     sui_end();
+
+    // We cache these here because until we're running physics it's the only
+    // place to snoop them.
+    current_pmove_onground = pmove_onground;
+    current_pmove_vel_z = pmove_vel_z;
 }
 
 noref float(string cmd) CSQC_ConsoleCommand = {
@@ -481,6 +490,7 @@ void _Sync_ServerCommandFrame() {
 float last_pmove_onground;
 float last_vel_z;
 float last_clientcommandframe;
+
 // REQUIRES: Must be called after _Sync_ServerCommandFrame.
 void _Sync_ClientCommandFrame() {
     // Client command frames are regenerated beyond the server frame, so we
@@ -493,7 +503,7 @@ void _Sync_ClientCommandFrame() {
     local float paused = getstatf(STAT_PAUSED);
     local float health = getstatf(STAT_HEALTH);
 
-    if (pmove_onground && health > 0 && !paused) {
+    if (current_pmove_onground && health > 0 && !paused) {
         // The pmove_vel_z < 180 check makes sure you're not sliding
         if (input_buttons & BUTTON2 && pmove_vel_z < 180) {
             localsound("player/plyrjmp8.wav", CHAN_BODY, cvar(FOCMD_JUMPVOLUME));
@@ -508,8 +518,8 @@ void _Sync_ClientCommandFrame() {
         }
     }
 
-    last_vel_z = pmove_vel_z;
-    last_pmove_onground = pmove_onground;
+    last_vel_z = current_pmove_vel_z;
+    last_pmove_onground = current_pmove_onground;
 }
 
 // Called for each {client, server} command frame, ensures globals are
