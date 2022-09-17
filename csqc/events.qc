@@ -339,6 +339,8 @@ void StopGrenTimers() {
         grentimers[i].Stop();
 }
 
+DEFCVAR_FLOAT(fo_grentimer_debug, 0);
+
 void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
     if (grentype == GR_TYPE_FLARE || grentype == GR_TYPE_CALTROP)
         return;
@@ -355,6 +357,19 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
     }
     CsGrenTimer timer = CsGrenTimer::GetNext();
     timer.Set(primed_at, explodes_at, grentype, timer_flags);
+
+    if (CVARF(fo_grentimer_debug) == 1) {
+        float ping = getplayerkeyfloat(player_localnum, INFOKEY_P_PING) / 1000;
+
+        float expires_old = time + 3.8 - ping;
+        float expires_new = timer.expiry();
+        float expires_ideal = explodes_at - ping/2;
+
+        print(sprintf("primed_at=%0.2f explodes_at=%0.2f fuse=%0.2f\n",
+                    primed_at, explodes_at, explodes_at - primed_at));
+        print(sprintf("ideal=%0.2f new=%0.2f old=%0.2f\n",
+                expires_ideal, expires_new, expires_old));
+    }
 }
 
 void ParseSBAR()
