@@ -305,6 +305,43 @@ void() CSQC_Parse_Event = {
     }
 }
 
+DEFCVAR_FLOAT(fo_grentimer_debug, 0);
+
+void play_retry(string sound, float channel, float volume, float adj) {
+    for (float i = 0; i < 3; i++) {
+        float update = soundupdate(self, channel, sound, volume, 0, 0, 0, adj);
+        if (CVARF(fo_grentimer_debug) & 1)
+               print(sprintf("%d soundupdate(%d) = %0.2f!\n", i, channel, update));
+        if (update == TRUE) {
+            return;
+        }
+    }
+}
+
+void OldPlayGren(float offset) {
+    local float channel = CHAN_GREN_START;
+    local float soundtime;
+    local float highest_soundtime = -1;
+
+    for(float i = CHAN_GREN_START; i <= CHAN_GREN_END; i++) {
+        soundtime = getsoundtime(self, i);
+
+        if (soundtime < 0) {
+            channel = i;
+            break;
+        }
+
+        if (soundtime > highest_soundtime) {
+            highest_soundtime = soundtime;
+            channel = i;
+        }
+    }
+
+    local string sound = cvar_string(FOCMD_GRENTIMERSOUND);
+    localsound(sound, channel, cvar(FOCMD_GRENTIMERVOLUME)); // required because soundupdate doesn't reset getsoundtime
+    soundupdate(self, channel, sound, cvar(FOCMD_GRENTIMERVOLUME), 0, 0, 0, offset);
+}
+
 void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
                       float timer_flags) {
     grentype_ = _grentype;
@@ -323,14 +360,21 @@ void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
 
     local float adj = 3.8 - (expires_at_ - time);
     string sound = cvar_string(FOCMD_GRENTIMERSOUND);
-    soundupdate(self, channel_, cvar_string(FOCMD_GRENTIMERSOUND),
-            cvar(FOCMD_GRENTIMERVOLUME), 0, 0, 0, adj);
+    float volume = cvar(FOCMD_GRENTIMERVOLUME);
+
+    if (CVARF(fo_grentimer_debug) & 4) {
+        localsound(sound, channel_, 0);
+        play_retry(sound, channel_, volume, adj);
+    } else {
+        OldPlayGren(adj);
+    }
 }
+
 
 void CsGrenTimer::Stop() {
     expires_at_ = -1;
     if (flags_ & FL_GT_SOUND)
-        soundupdate(self, channel_, "", -1, 0, 0, 0, 0);  // -ve volume => stop.
+        soundupdate(self, channel_, "", 0, 0, 0, 0, 0);  // -ve volume => stop.
     flags_ = 0;
 }
 
@@ -338,8 +382,6 @@ void StopGrenTimers() {
     for (float i = 0; i < NUM_GREN_TIMERS; i++)
         grentimers[i].Stop();
 }
-
-DEFCVAR_FLOAT(fo_grentimer_debug, 0);
 
 void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
     if (grentype == GR_TYPE_FLARE || grentype == GR_TYPE_CALTROP)
@@ -358,15 +400,16 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
     CsGrenTimer timer = CsGrenTimer::GetNext();
     timer.Set(primed_at, explodes_at, grentype, timer_flags);
 
-    if (CVARF(fo_grentimer_debug) == 1) {
+    if (CVARF(fo_grentimer_debug) & 1) {
         float ping = getplayerkeyfloat(player_localnum, INFOKEY_P_PING) / 1000;
 
         float expires_old = time + 3.8 - ping;
         float expires_new = timer.expiry();
         float expires_ideal = explodes_at - ping/2;
 
-        print(sprintf("primed_at=%0.2f explodes_at=%0.2f fuse=%0.2f\n",
-                    primed_at, explodes_at, explodes_at - primed_at));
+        print(sprintf("primed_at=%0.2f explodes_at=%0.2f fuse=%0.2f chan=%d\n",
+                    primed_at, explodes_at, explodes_at - primed_at,
+                    timer.channel()));
         print(sprintf("ideal=%0.2f new=%0.2f old=%0.2f\n",
                 expires_ideal, expires_new, expires_old));
     }
