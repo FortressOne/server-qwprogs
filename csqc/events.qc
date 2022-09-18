@@ -309,7 +309,7 @@ DEFCVAR_FLOAT(fo_grentimer_debug, 0);
 
 void play_retry(string sound, float channel, float volume, float adj) {
     for (float i = 0; i < 3; i++) {
-        float update = soundupdate(self, channel, sound, volume, 0, 0, 0, adj);
+        float update = soundupdate(world, channel, sound, volume, 0, 0, 0, adj);
         if (CVARF(fo_grentimer_debug) & 1)
                print(sprintf("%d soundupdate(%d) = %0.2f!\n", i, channel, update));
         if (update == TRUE) {
@@ -339,7 +339,7 @@ void OldPlayGren(float offset) {
 
     local string sound = cvar_string(FOCMD_GRENTIMERSOUND);
     localsound(sound, channel, cvar(FOCMD_GRENTIMERVOLUME)); // required because soundupdate doesn't reset getsoundtime
-    soundupdate(self, channel, sound, cvar(FOCMD_GRENTIMERVOLUME), 0, 0, 0, offset);
+    soundupdate(world, channel, sound, cvar(FOCMD_GRENTIMERVOLUME), 0, 0, 0, offset);
 }
 
 void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,

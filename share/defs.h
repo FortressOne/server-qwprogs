@@ -172,10 +172,10 @@
 #define CHAN_VOICE	2
 #define CHAN_ITEM	3
 #define CHAN_BODY	4
+#define CHAN_GREN_START 5
+#define CHAN_GREN_END 7
 #define CHAN_NO_PHS_ADD	8
-#define NUM_GREN_TIMERS 5
-#define CHAN_GREN_START 9
-#define CHAN_GREN_END (CHAN_GREN_START + NUM_GREN_TIMERS - 1)
+#define NUM_GREN_TIMERS 5 // We overlap channels when >3 active.
 
 #define ATTN_NONE	0
 #define ATTN_NORM	1

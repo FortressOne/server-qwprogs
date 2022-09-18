@@ -467,8 +467,10 @@ class CsGrenTimer {
     static CsGrenTimer last_;
 
     static void() Init {
+        float num_gren_sound = CHAN_GREN_END - CHAN_GREN_START + 1;
         for (float i = 0; i < NUM_GREN_TIMERS; i++)
-            grentimers[i] = spawn(CsGrenTimer, channel_: CHAN_GREN_START + i);
+            grentimers[i] = spawn(CsGrenTimer,
+                    channel_: CHAN_GREN_START + (i % num_gren_sound));
     };
 
     static void() StopAll {
