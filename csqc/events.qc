@@ -307,15 +307,13 @@ void() CSQC_Parse_Event = {
 
 DEFCVAR_FLOAT(fo_grentimer_debug, 0);
 
-void play_retry(string sound, float channel, float volume, float adj) {
-    for (float i = 0; i < 3; i++) {
-        float update = soundupdate(world, channel, sound, volume, 0, 0, 0, adj);
-        if (CVARF(fo_grentimer_debug) & 1)
-               print(sprintf("%d soundupdate(%d) = %0.2f!\n", i, channel, update));
-        if (update == TRUE) {
-            return;
-        }
+string cached_timer;
+string GetGrenTimerSound() {
+    string wav = cvar_string(FOCMD_GRENTIMERSOUND);
+    if (cached_timer != wav) {
+        cached_timer = wav;
     }
+    return wav;
 }
 
 void OldPlayGren(float offset) {
@@ -324,7 +322,7 @@ void OldPlayGren(float offset) {
     local float highest_soundtime = -1;
 
     for(float i = CHAN_GREN_START; i <= CHAN_GREN_END; i++) {
-        soundtime = getsoundtime(self, i);
+        soundtime = getsoundtime(world, i);
 
         if (soundtime < 0) {
             channel = i;
@@ -337,9 +335,9 @@ void OldPlayGren(float offset) {
         }
     }
 
-    local string sound = cvar_string(FOCMD_GRENTIMERSOUND);
-    localsound(sound, channel, cvar(FOCMD_GRENTIMERVOLUME)); // required because soundupdate doesn't reset getsoundtime
-    soundupdate(world, channel, sound, cvar(FOCMD_GRENTIMERVOLUME), 0, 0, 0, offset);
+    local string wav = GetGrenTimerSound();
+    localsound(wav, channel, cvar(FOCMD_GRENTIMERVOLUME)); // required because soundupdate doesn't reset getsoundtime
+    soundupdate(world, channel, wav, cvar(FOCMD_GRENTIMERVOLUME), 0, 0, 0, offset);
 }
 
 void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
@@ -359,13 +357,14 @@ void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
         return;
 
     local float adj = 3.8 - (expires_at_ - time);
-    string sound = cvar_string(FOCMD_GRENTIMERSOUND);
+    string wav = GetGrenTimerSound();
     float volume = cvar(FOCMD_GRENTIMERVOLUME);
 
-    if (CVARF(fo_grentimer_debug) & 4) {
-        localsound(sound, channel_, 0);
-        play_retry(sound, channel_, volume, adj);
+    if (CVARF(fo_grentimer_debug) & 2) {
+        localsound(wav, channel_, volume);
+        soundupdate(world, channel_, wav, volume, 0, 0, 0, adj);
     } else {
+        // Default to old until new gets more testing.
         OldPlayGren(adj);
     }
 }
