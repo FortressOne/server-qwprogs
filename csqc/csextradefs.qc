@@ -458,6 +458,9 @@ class CsGrenTimer {
     nonvirtual void() set_thrown { flags_ |= FL_GT_THROWN; };
     nonvirtual float() is_thrown { return flags_ & FL_GT_THROWN; };
     nonvirtual float() channel { return channel_; };
+    nonvirtual float() sound_offset {
+        return 3.8 - (expires_at_ - time);
+    };
 
     nonvirtual void(float primed_at, float expires_at,
                     float grentype, float timer_flags) Set;
@@ -470,6 +473,7 @@ class CsGrenTimer {
         float num_gren_sound = CHAN_GREN_END - CHAN_GREN_START + 1;
         for (float i = 0; i < NUM_GREN_TIMERS; i++)
             grentimers[i] = spawn(CsGrenTimer,
+                    entnum: 10000 + i,
                     channel_: CHAN_GREN_START + (i % num_gren_sound));
     };
 
