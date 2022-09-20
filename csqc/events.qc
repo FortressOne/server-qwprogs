@@ -108,7 +108,6 @@ void() CSQC_Parse_Event = {
         case MSG_GRENTHROWN:
             CsGrenTimer last = CsGrenTimer::GetLast();
             last.set_thrown();
-            //CsGrenTimer::GetLast().set_thrown();
             break;
         case MSG_PLAYERDIE:
             last_death_time = readfloat();
@@ -311,6 +310,7 @@ string cached_timer;
 string GetGrenTimerSound() {
     string wav = cvar_string(FOCMD_GRENTIMERSOUND);
     if (cached_timer != wav) {
+        precache_sound(wav);
         cached_timer = wav;
     }
     return wav;
@@ -359,18 +359,16 @@ void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
     string wav = GetGrenTimerSound();
     float volume = cvar(FOCMD_GRENTIMERVOLUME);
 
-    // Can't localsound since that goes to world.  There's also a bug where
-    // starting sound with soundupdate returns false, even though it started,
-    // so "retry" for that as well as resiliency for now.
-    soundupdate(this, CHAN_WEAPON, wav, volume, 0, 0, 0, sound_offset());
-    soundupdate(this, CHAN_WEAPON, wav, volume, 0, 0, 0, sound_offset());
+    // Note there's a bug where soundupdate returns false for a new sample, even
+    // though it's started.
+    soundupdate(this, CHAN_VOICE, wav, volume, 0, 0, 0, sound_offset());
 }
 
 
 void CsGrenTimer::Stop() {
     expires_at_ = -1;
     if (flags_ & FL_GT_SOUND)
-        soundupdate(this, CHAN_WEAPON, "", -1, 0, 0, 0, 0);  // -volume => stop.
+        soundupdate(this, CHAN_VOICE, "", -1, 0, 0, 0, 0);  // -volume => stop.
     flags_ = 0;
 }
 
@@ -401,10 +399,10 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
     }
 
     float debug_print_state = CVARF(fo_grentimer_debug) & 1;
-    float debug_use_old_sound = CVARF(fo_grentimer_debug) & 2;
+    float debug_use_new_sound = CVARF(fo_grentimer_debug) & 2;
 
     float play_old_sound = FALSE;
-    if (debug_use_old_sound) {
+    if (!debug_use_new_sound) {
         play_old_sound = timer_flags & FL_GT_SOUND;
         timer_flags &= ~FL_GT_SOUND;
     }

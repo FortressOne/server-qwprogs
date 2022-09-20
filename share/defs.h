@@ -176,8 +176,8 @@
 
 // We can overlap these with regular channels since they play on the world ent.
 #define NUM_GREN_TIMERS 5 // We overlap channels when >3 active.
-#define CHAN_GREN_START 5
-#define CHAN_GREN_END 9
+#define CHAN_GREN_START 9
+#define CHAN_GREN_END 13
 // #define CHAN_GREN_END (CHAN_GREN_START + NUM_GREN_TIMERS - 1)
 
 #define ATTN_NONE	0
