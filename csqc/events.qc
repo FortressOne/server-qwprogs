@@ -420,7 +420,7 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
         float expires_new = timer.expiry();
         float expires_ideal = explodes_at - ping/2;
 
-        print(sprintf("primed_at=%0.2f explodes_at=%0.2f fuse=%0.2f new_s=%d\n",
+        print(sprintf("primed_at=%0.2f explodes_at=%0.2f fuse=%0.2f new=%d\n",
                     primed_at, explodes_at, explodes_at - primed_at,
                     debug_use_new_sound));
         print(sprintf("ideal=%0.2f new=%0.2f old=%0.2f\n",
