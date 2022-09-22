@@ -599,6 +599,7 @@ float max_armor_hwguy;
 
 float project_weapons;
 float project_weapons_max_latency;
+float project_grenades;
 
 float ng_velocity;
 float ng_damage;

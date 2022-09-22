@@ -29,7 +29,7 @@ void AL_ProjectProjectile (entity projectile) {
 }
 
 float AL_GrenadeOffset() {
-    if (!CF_GetSetting("pg", "project_grenades", "off"))
+    if (!project_grenades)
         return 0;
 
     local float offset = infokeyf(self, INFOKEY_P_PING) / 1000;

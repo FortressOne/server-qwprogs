@@ -622,8 +622,11 @@ void () DecodeLevelParms = {
         // project projectile weapons by player ping
         project_weapons = CF_GetSetting("pw", "project_weapons", "off");
 
-        // max projection latency (default 100ms)
+        // max projectile projection latency (default 100ms)
         project_weapons_max_latency = CF_GetSetting("pwml", "project_weapons_max_latency", ftos(0.1));
+
+        // Correct grenade prime timing by player ping.
+        project_grenades = CF_GetSetting("pg", "project_grenades", "on");
 
         // delay respawning by this many seconds [0]
         Role_None.respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
@@ -1019,6 +1022,7 @@ void () DecodeLevelParms = {
             medicaura = FALSE;
             medicnocuss = FALSE;
             project_weapons = FALSE;
+            project_grenades = TRUE;
             distance_based_cuss_duration = FALSE;
             pyro_type = 1;
             drop_grenades = FALSE;
