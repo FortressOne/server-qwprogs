@@ -96,8 +96,8 @@ void(string panelid, float display, string text) drawSpecial = {
 };
 
 void(string panelid, float display, string text) drawGrenTimerPanel = {
-    local float timeleft;
-    local float timercount = 0;
+    float timeleft;
+    float timercount = 0;
 
     if (display) {
         FO_Hud_Panel* panel = getAnyHudPanelByNamePointer(panelid);
@@ -110,8 +110,11 @@ void(string panelid, float display, string text) drawGrenTimerPanel = {
         panel2.Display = panel.Display;
         panel2.FillSize = panel.FillSize;
 
-        for (float i = 0; i < grentimers.length; i++) {
-            local CsGrenTimer gt = grentimers[i];
+        CsGrenTimer lt = CsGrenTimer::GetLast();
+        // We want to render in reverse mod order from the last primed grenade
+        // here, that way we'll properly stack timers relative to expiry.
+        for (float i = grentimers.length; i > 0; i--) {
+            CsGrenTimer gt = grentimers[(lt.index() + i) % grentimers.length];
 
             if (!gt.active())
                 continue;
@@ -125,7 +128,11 @@ void(string panelid, float display, string text) drawGrenTimerPanel = {
                 panel2.TextScale = TextScale * 0.8;
             }
 
-            local float alpha = (gt.is_thrown()) ? 0.3 : 1.0;
+            // It's technically possible to get a primed message before thrown
+            // if things get reordered, but since we can only ever have one
+            // grenade primed, we can obscure this by always considering
+            // grenades after the first as primed.
+            float alpha = (gt.is_thrown() || timercount) ? 0.3 : 1.0;
             Hud_DrawPanelLMP(&panel2, ftos(timeleft),
                 GrenadeIcons[gt.grentype()].icon, alpha);
             panel2.Position = panel2.Position +

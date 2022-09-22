@@ -446,11 +446,13 @@ class CsGrenTimer;
 CsGrenTimer grentimers[NUM_GREN_TIMERS];
 
 class CsGrenTimer {
+    float index_;
     float primed_at_;
     float expires_at_;
     float flags_;
     float grentype_;
 
+    nonvirtual float() index { return index_; };
     nonvirtual float() active { return expires_at_ > time; };
     nonvirtual float() expiry { return expires_at_; };
     nonvirtual float() grentype { return grentype_; };
@@ -470,7 +472,7 @@ class CsGrenTimer {
 
     static void() Init {
         for (float i = 0; i < grentimers.length; i++)
-            grentimers[i] = spawn(CsGrenTimer);
+            grentimers[i] = spawn(CsGrenTimer, index_: i);
     };
 
     static void() StopAll {
