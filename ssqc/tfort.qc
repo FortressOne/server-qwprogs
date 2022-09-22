@@ -932,9 +932,7 @@ void (float inp) TeamFortress_PrimeThrowGrenade = {
     }
 };
 
-void () TeamFortress_GrenadePrimedThink;
-void () FO_PreciseGrenadeThink;
-float () FO_UsePreciseGrenades;
+void () FO_GrenadeThink;
 
 // is_player defines whether this originated from the player or server.  Player
 // generated primes are corrected for latency when project_grenades is on.
@@ -1130,39 +1128,12 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
         }
     }
 
-    if (FO_UsePreciseGrenades())
-        tGrenade.think = FO_PreciseGrenadeThink;
-    else
-        tGrenade.think = TeamFortress_GrenadePrimedThink;
+    tGrenade.think = FO_GrenadeThink;
     self.grenade_timer = tGrenade;
 };
 
-void () TeamFortress_GrenadePrimedThink = {
-    local entity user;
 
-    user = self.owner;
-    if (!(user.tfstate & TFSTATE_GRENTHROWING) && !user.deadflag && !user.has_disconnected) {
-        self.nextthink = time + 0.1;
-        if (!self.think)
-            dremove(self);
-
-        if (time > self.heat && self.weapon != GR_TYPE_CALTROP)
-            TeamFortress_ExplodePerson();
-
-        return;
-    }
-    if (!(user.tfstate & TFSTATE_GRENPRIMED))
-        dprint("GrenadePrimed logic error\n");
-
-    FO_SpawnThrownGrenade(self);
-    dremove(self);
-};
-
-float () FO_UsePreciseGrenades = {
-    return FO_GetUserSetting(self, "precise_grenades", "pg", "on");
-}
-
-void () FO_PreciseGrenadeThink = {
+void () FO_GrenadeThink = {
     local entity user = self.owner;
 
     // Claim: These cases do not exist for FO; to be removed once proven true.
@@ -1186,12 +1157,13 @@ void () FO_PreciseGrenadeThink = {
             self.nextthink = self.heat;
         }
     } else {
-        TeamFortress_ExplodePerson();
+        if (self.weapon != GR_TYPE_CALTROP)
+            TeamFortress_ExplodePerson();
         dremove(self);
     }
 }
 
-void () FO_ThrowPreciseGrenade = {
+void () FO_ThrowGrenade = {
     local entity timer = self.grenade_timer;
     if (timer.nextthink != timer.heat || timer.heat - time < 0.1) {
         // We do not allow throwing within the first second, or the last 0.1.
@@ -1212,10 +1184,7 @@ void () TeamFortress_ThrowGrenade = {
         return;
 
     self.tfstate |= TFSTATE_GRENTHROWING;
-    // While this is controlled by localinfo, it's a per-grenade value.
-    if (FO_UsePreciseGrenades() &&
-        self.grenade_timer.think == FO_PreciseGrenadeThink)
-        FO_ThrowPreciseGrenade();
+    FO_ThrowGrenade();
 };
 
 void () TeamFortress_GrenadeSwitch = {
