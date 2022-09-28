@@ -36,11 +36,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("fo_hud_save");
     registercommand("fo_hud_load");
 
-    registercvar(FOCMD_GRENTIMER, "1");
-    registercvar(FOCMD_GRENTIMERSOUND, "grentimer.wav");
-    registercvar(FOCMD_GRENTIMERVOLUME, "1");
-    registercvar(FOCMD_JUMPVOLUME, "1");
-
     registercommand("fo_menu_game");
     registercommand("fo_main_menu");
     registercommand("fo_menu_team");
@@ -52,7 +47,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("fo_menu_build");
     registercommand("fo_menu_dropammo");
     registercommand("fo_menu_cancel");
-    registercvar(FOCMD_ADMIN_MENU_UPDATE_TIME, "2");
 
     registercommand("+aux_jump");
     registercommand("-aux_jump");
@@ -82,7 +76,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     registercommand("vote_addmap");
     registercommand("vote_removemap");
-    registercvar("fo_hud_idle_alpha", "0.3");
     for(float i = 0; i < MENU_OPTION.length - 1; i++) {
         registercvar(strcat("fo_menu_option_",MENU_OPTION[i]), MENU_OPTION[i]);
     }
@@ -143,7 +136,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
             if ((input_buttons & BUTTON2) && (pmove_vel_z < 180 /* not sliding */)) {
                 if (jumpsound_cooldown < time) {
                     jumpsound_cooldown = time + 0.01;
-                    localsound("player/plyrjmp8.wav", CHAN_BODY, cvar(FOCMD_JUMPVOLUME));
+                    localsound("player/plyrjmp8.wav", CHAN_BODY, CVARF(FOCMD_JUMPVOLUME));
                 }
             }
 
@@ -242,7 +235,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             Menu_Cancel();
             break;
         case "+fo_showscores":
-            if (cvar(FOCMD_OLDSCOREBOARD) == 1)
+            if (CVARF(FOCMD_OLDSCOREBOARD) == 1)
             {
                 tokenize(findkeysforcommand(argv(0)));
 
@@ -271,7 +264,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "+showscores":
         case "+showteamscores":
             showingscores = TRUE;
-            if (cvar(FOCMD_OLDSCOREBOARD) != 1)
+            if (CVARF(FOCMD_OLDSCOREBOARD) != 1)
             {
                 tokenize(findkeysforcommand(argv(0)));
 

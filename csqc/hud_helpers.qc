@@ -230,20 +230,6 @@ void Hud_DrawStringLMPThreshold(vector pos, string value, float size, float thre
     }
 }
 
-string FormatCfgString(string line, string field, string value)
-{
-    line = strcat(line, "\n", field, ":", value);
-
-    return line;
-}
-
-string FormatCfgVector(string line, string field, vector value)
-{
-    line = strcat(line, "\n", field, ":", strcat(ftos(value_x), ",", ftos(value_y)));
-
-    return line;
-}
-
 string GetPanelString(string line, string name)
 {
     line = FormatCfgVector(line, strcat(name, ".position"), DrawPanel.Position);
