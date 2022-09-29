@@ -317,30 +317,6 @@ string GetGrenTimerSound() {
     return wav;
 }
 
-void OldPlayGren(float offset) {
-    local float channel = CHAN_GREN_START;
-    local float soundtime;
-    local float highest_soundtime = -1;
-
-    for(float i = CHAN_GREN_START; i <= CHAN_GREN_END; i++) {
-        soundtime = getsoundtime(world, i);
-
-        if (soundtime < 0) {
-            channel = i;
-            break;
-        }
-
-        if (soundtime > highest_soundtime) {
-            highest_soundtime = soundtime;
-            channel = i;
-        }
-    }
-
-    local string wav = GetGrenTimerSound();
-    localsound(wav, channel, CVARF(FOCMD_GRENTIMERVOLUME)); // required because soundupdate doesn't reset getsoundtime
-    soundupdate(self, channel, wav, CVARF(FOCMD_GRENTIMERVOLUME), 0, 0, 0, offset);
-}
-
 void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
                       float timer_flags) {
     grentype_ = _grentype;
@@ -377,11 +353,6 @@ void StopGrenTimers() {
     // New style.
     for (float i = 0; i < NUM_GREN_TIMERS; i++)
         grentimers[i].Stop();
-
-    // Old style.
-    for (float i = CHAN_GREN_START; i <= CHAN_GREN_END; i++) {
-        soundupdate(self, i, "", 0, 0, 0, 0, 0);
-    }
 }
 
 void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
@@ -400,19 +371,9 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
     }
 
     float debug_print_state = CVARF(fo_grentimer_debug) & 1;
-    float debug_use_old_sound = CVARF(fo_grentimer_debug) & 4;
-
-    float play_old_sound = FALSE;
-    if (debug_use_old_sound) {
-        play_old_sound = timer_flags & FL_GT_SOUND;
-        timer_flags &= ~FL_GT_SOUND;
-    }
 
     CsGrenTimer timer = CsGrenTimer::GetNext();
     timer.Set(primed_at, explodes_at, grentype, timer_flags);
-
-    if (play_old_sound)
-        OldPlayGren(timer.sound_offset());
 
     if (debug_print_state) {
         float ping = getplayerkeyfloat(player_localnum, INFOKEY_P_PING) / 1000;
@@ -421,11 +382,8 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
         float expires_new = timer.expiry();
         float expires_ideal = explodes_at - ping/2;
 
-        print(sprintf("primed_at=%0.2f explodes_at=%0.2f fuse=%0.2f new=%d\n",
-                    primed_at, explodes_at, explodes_at - primed_at,
-                    !debug_use_old_sound));
-        print(sprintf("ideal=%0.2f new=%0.2f old=%0.2f\n",
-                expires_ideal, expires_new, expires_old));
+        print(sprintf("primed_at=%0.2f explodes_at=%0.2f fuse=%0.2f\n",
+                      primed_at, explodes_at, explodes_at - primed_at));
     }
 }
 
