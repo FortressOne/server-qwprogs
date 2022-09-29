@@ -310,15 +310,9 @@ string cached_timer;
 string GetGrenTimerSound() {
     string wav = CVARS(FOCMD_GRENTIMERSOUND);
 
-    // The string NE-uop below is suspect in crashes.  Possible interaction
-    // with cvar_string implementation.  Hopefully the migration to autocvar
-    // resolves this, but also put it behind a debug control temporarily so we
-    // can test with/without.
-    if (CVARF(fo_grentimer_debug) & 8 == 1) {
-        if (cached_timer != wav) {
-            precache_sound(wav);
-            cached_timer = wav;
-        }
+    if (cached_timer != wav) {
+        precache_sound(wav);
+        cached_timer = wav;
     }
     return wav;
 }
@@ -406,10 +400,10 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
     }
 
     float debug_print_state = CVARF(fo_grentimer_debug) & 1;
-    float debug_use_new_sound = CVARF(fo_grentimer_debug) & 2;
+    float debug_use_old_sound = CVARF(fo_grentimer_debug) & 4;
 
     float play_old_sound = FALSE;
-    if (!debug_use_new_sound) {
+    if (debug_use_old_sound) {
         play_old_sound = timer_flags & FL_GT_SOUND;
         timer_flags &= ~FL_GT_SOUND;
     }
@@ -429,7 +423,7 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
 
         print(sprintf("primed_at=%0.2f explodes_at=%0.2f fuse=%0.2f new=%d\n",
                     primed_at, explodes_at, explodes_at - primed_at,
-                    debug_use_new_sound));
+                    !debug_use_old_sound));
         print(sprintf("ideal=%0.2f new=%0.2f old=%0.2f\n",
                 expires_ideal, expires_new, expires_old));
     }
