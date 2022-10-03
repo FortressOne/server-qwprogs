@@ -301,6 +301,12 @@ void() CSQC_Parse_Event = {
         case MSG_VOTE_MAP_DELETE:
             RemoveVoteMap(readstring(), FALSE);
             break;
+        case MSG_PAUSE:
+            CsGrenTimer::SyncPause();
+            break;
+        case MSG_UNPAUSE:
+            CsGrenTimer::SyncUnpause();
+            break;
     }
 }
 
@@ -317,6 +323,19 @@ string GetGrenTimerSound() {
     return wav;
 }
 
+void CsGrenTimer::StartSound() {
+    if !(this.flags_ & FL_GT_SOUND)
+        return;
+
+    string wav = GetGrenTimerSound();
+    float volume = CVARF(FOCMD_GRENTIMERVOLUME);
+
+    // Note there's a bug where soundupdate returns false for a new sample, even
+    // though it's started.
+    soundupdate(this, CHAN_VOICE, wav, volume, 0, 0, 0, sound_offset());
+}
+
+
 void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
                       float timer_flags) {
     grentype_ = _grentype;
@@ -330,22 +349,12 @@ void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
         expires_at_ -= rtt/2;
     }
 
-    if !(this.flags_ & FL_GT_SOUND)
-        return;
-
-    string wav = GetGrenTimerSound();
-    float volume = CVARF(FOCMD_GRENTIMERVOLUME);
-
-    // Note there's a bug where soundupdate returns false for a new sample, even
-    // though it's started.
-    soundupdate(this, CHAN_VOICE, wav, volume, 0, 0, 0, sound_offset());
+    StartSound();
 }
-
 
 void CsGrenTimer::Stop() {
     expires_at_ = -1;
-    if (flags_ & FL_GT_SOUND)
-        soundupdate(this, CHAN_VOICE, "", -1, 0, 0, 0, 0);  // -volume => stop.
+    PauseSound();  // Pause is really stop.
     flags_ = 0;
 }
 

@@ -467,6 +467,12 @@ class CsGrenTimer {
                     float grentype, float timer_flags) Set;
     nonvirtual void() Stop;
 
+    nonvirtual void() PauseSound {
+        if (flags_ & FL_GT_SOUND)  // -volume => stop.
+            soundupdate(this, CHAN_VOICE, "", -1, 0, 0, 0, 0);
+    };
+    nonvirtual void() StartSound;
+
     static float next_index_;
     static CsGrenTimer last_;
 
@@ -484,6 +490,19 @@ class CsGrenTimer {
         next_index_ = (next_index_ + 1) % grentimers.length;
         last_ = grentimers[next_index_];
         return last_;
+    };
+    static void() SyncPause {
+        // Time froze, but sound kept running, realign.
+        for (float i = 0; i < grentimers.length; i++)
+            if (grentimers[i].active)
+                grentimers[i].PauseSound();
+    };
+
+    static void() SyncUnpause {
+        // Time froze, but sound kept running, realign.
+        for (float i = 0; i < grentimers.length; i++)
+            if (grentimers[i].active)
+                grentimers[i].StartSound();
     };
 
     static CsGrenTimer() GetLast { return last_; };

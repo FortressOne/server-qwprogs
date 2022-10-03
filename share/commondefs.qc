@@ -32,6 +32,8 @@
 #define MSG_VOTE_MAP_ADD    20
 #define MSG_VOTE_MAP_DELETE 21
 #define MSG_PLAYERDIE       22
+#define MSG_PAUSE           23
+#define MSG_UNPAUSE         24
 
 #define FLAGINFO_HOME       1
 #define FLAGINFO_CARRIED    2
