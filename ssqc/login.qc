@@ -13,7 +13,7 @@ void (entity player, string login, string secret) performLogin = {
 	dprint("\n");
 }
 
-void(float reqid, float responsecode, string resourcebody) URI_Get_Callback = {
+void(float reqid, float responsecode, string resourcebody, int resourcebytes) URI_Get_Callback = {
 	local float got_one = 0;
 	self.login_in_progress = 0;	
 	local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
@@ -35,9 +35,9 @@ void(float reqid, float responsecode, string resourcebody) URI_Get_Callback = {
 				self.is_admin = TRUE;
 				forceinfokey(self,"*admin", ftos(self.is_admin));
 				Admin_Aliases ();
-				bprint2 (2, self.netname, " \sgains full admin status!\s\n");
+				bprint(2, self.netname, " \sgains full admin status!\s\n");
 //				bprint (3, "\n");
-				sprint (self, 2, "Type \scommands\s for admin commands.\n");
+				sprint(self, 2, "Type \scommands\s for admin commands.\n");
 			}
 		}
 		if(self.team_no == 0 && !intermission_running) {

@@ -513,7 +513,7 @@ void (entity pl, string...count) Status_Print =
 
     lines = 0;
     for (i = 0; i < len; i++)
-        if (substr(pl.StatusString, i, 1) == "\n")
+        if (substring(pl.StatusString, i, 1) == "\n")
             lines++;
 
     pl.StatusStringLines = lines;
@@ -539,7 +539,7 @@ void (entity pl, f_void_float func, string...count) Status_Menu =
 
     lines = 0;
     for (i = 0; i < len; i++)
-        if (substr(pl.StatusString, i, 1) == "\n")
+        if (substring(pl.StatusString, i, 1) == "\n")
             lines++;
 
     pl.StatusStringLines = lines;

@@ -31,7 +31,7 @@ void () MatchThink =
     if (!self.cnt2) {
         if (self.cnt == 1 || self.cnt == 5)         {
             tmp = ftos (self.cnt);
-            bprint3(2, Q"\s[\s", tmp, "\s]\s minute");
+            bprint(2, Q"\s[\s", tmp, "\s]\s minute");
             if (self.cnt != 1) {
                 bprint(2, "s");
             }
@@ -46,7 +46,7 @@ void () MatchThink =
     }
     if (!self.cnt && (((self.cnt2 == 30) || (self.cnt2 == 15)) || (self.cnt2 <= 10))) {
         tmp = ftos(self.cnt2);
-        bprint3(2, Q"\s[\s", tmp, "\s]\s second");
+        bprint(2, Q"\s[\s", tmp, "\s]\s second");
         if (self.cnt2 != 1) {
             bprint(2, "s");
         }
@@ -207,7 +207,7 @@ string () GetPlayersName
                 if (strlen(plname) <= 13) {
                     st = strcat( st, plname );
                 } else {
-                    st = strcat( st, substr(plname,0,12));
+                    st = strcat( st, substring(plname,0,12));
                 }
             }
             te = find (te, classname, "player");
@@ -229,19 +229,8 @@ string () GetGameFileName = {
     i = 0;
     t = find (world, classname, "prematch");
     if (t != world)
-    {       
-        calltimeofday ();
-        str = strcat(str, tod_year); // year
-        str = strcat(str, "-");
-        str = strcat(str, tod_mon); // month
-        str = strcat(str, "-");          
-        str = strcat(str, tod_day); // day        
-        str = strcat(str, "_");        
-        str = strcat(str, tod_hour); // hour
-        str = strcat(str, "-");
-        str = strcat(str, tod_min); // minute
-        str = strcat(str, "-");
-        str = strcat(str, tod_sec); // second
+    {
+        str = strftime(TRUE, "%Y-%m-%d-%H-%M-%S");
     }
     str = strcat(str, "_[");
     str = strcat(str, mapname);
@@ -312,7 +301,7 @@ void () PreMatch_Think = {
     fl = (self.cnt2 / 60);
     if (fl == 1 || fl == 2 || fl == 3 || fl == 4 || fl == 5 || fl == 6 || fl == 7 || fl == 8 || fl == 9 || fl == 10) {
         num = ftos(fl);
-        bprint3(2, "Match will begin in ", num, " minute(s).\n");
+        bprint(2, "Match will begin in ", num, " minute(s).\n");
     }
     if (self.cnt2 == 30)    {
         num = ftos(self.cnt2 / 60);
@@ -326,7 +315,6 @@ void () PreMatch_Think = {
             localcmd("cancel\n");
             if (stof(infokey(world, "demo_auto_left")) > 0) {
                 if (infokey(world, "serverdemo") == "on") {
-                    calltimeofday();
 
                     localcmd("record \"");
                     str = strzone(GetGameFileName());
@@ -360,7 +348,7 @@ void () PreMatch_Think = {
             p = find(p, classname, "player");
         }
         if (self.cnt2 > 1) {
-            bprint2(2, num, " seconds \n");
+            bprint(2, num, " seconds \n");
         }
         else {
             bprint(2, "1 second \n");
@@ -584,9 +572,9 @@ void () DumpClanScores = {
         if ((winners != 2) && (t2_pl != 0)) {
             st = GetTeamName(2);
             if (printed == no_teams) {
-                bprint2(PRINT_HIGH, " and ", st);
+                bprint(PRINT_HIGH, " and ", st);
             } else if (printed) {
-                bprint2(PRINT_HIGH, ", ", st);
+                bprint(PRINT_HIGH, ", ", st);
             } else {
                 bprint(PRINT_HIGH, st);
             }
@@ -595,9 +583,9 @@ void () DumpClanScores = {
         if ((winners != 3) && (t3_pl != 0)) {
             st = GetTeamName(3);
             if (printed == no_teams) {
-                bprint2(PRINT_HIGH, " and ", st);
+                bprint(PRINT_HIGH, " and ", st);
             } else if (printed) {
-                bprint2(PRINT_HIGH, ", ", st);
+                bprint(PRINT_HIGH, ", ", st);
             } else {
                 bprint(PRINT_HIGH, st);
             }
@@ -606,9 +594,9 @@ void () DumpClanScores = {
         if ((winners != 4) && (t4_pl != 0)) {
             st = GetTeamName(4);
             if (printed == no_teams) {
-                bprint2(PRINT_HIGH, " and ", st);
+                bprint(PRINT_HIGH, " and ", st);
             } else if (printed) {
-                bprint2(PRINT_HIGH, ", ", st);
+                bprint(PRINT_HIGH, ", ", st);
             } else {
                 bprint(PRINT_HIGH, st);
             }
@@ -773,49 +761,49 @@ void () DumpClanScores = {
         bprint(PRINT_HIGH, "\n=------= Blue team results =------=\n");
         tno = TeamFortress_TeamGetNoPlayers(1);
         st = ftos(tno);
-        bprint2(PRINT_HIGH, st, " players\n");
+        bprint(PRINT_HIGH, st, " players\n");
         st = ftos(team1frags);
-        bprint2(PRINT_HIGH, st, " frags, ");
+        bprint(PRINT_HIGH, st, " frags, ");
         st = ftos(t1_unacc);
-        bprint2(PRINT_HIGH, st, " unaccounted for\n");
+        bprint(PRINT_HIGH, st, " unaccounted for\n");
         st = ftos(team1score);
-        bprint2(PRINT_HIGH, st, " team score\n");
+        bprint(PRINT_HIGH, st, " team score\n");
     }
     if (t2_pl > 0) {
         bprint(PRINT_HIGH, "\n=------= Red team results =------=\n");
         tno = TeamFortress_TeamGetNoPlayers(2);
         st = ftos(tno);
-        bprint2(PRINT_HIGH, st, " players\n");
+        bprint(PRINT_HIGH, st, " players\n");
         st = ftos(team2frags);
-        bprint2(PRINT_HIGH, st, " frags, ");
+        bprint(PRINT_HIGH, st, " frags, ");
         st = ftos(t2_unacc);
-        bprint2(PRINT_HIGH, st, " unaccounted for\n");
+        bprint(PRINT_HIGH, st, " unaccounted for\n");
         st = ftos(team2score);
-        bprint2(PRINT_HIGH, st, " team score\n");
+        bprint(PRINT_HIGH, st, " team score\n");
     }
     if (t3_pl > 0) {
         bprint(PRINT_HIGH, "\n=------= Yellow team results =------=\n");
         tno = TeamFortress_TeamGetNoPlayers(3);
         st = ftos(tno);
-        bprint2(PRINT_HIGH, st, " players\n");
+        bprint(PRINT_HIGH, st, " players\n");
         st = ftos(team3frags);
-        bprint2(PRINT_HIGH, st, " frags, ");
+        bprint(PRINT_HIGH, st, " frags, ");
         st = ftos(t3_unacc);
-        bprint2(PRINT_HIGH, st, " unaccounted for\n");
+        bprint(PRINT_HIGH, st, " unaccounted for\n");
         st = ftos(team3score);
-        bprint2(PRINT_HIGH, st, " team score\n");
+        bprint(PRINT_HIGH, st, " team score\n");
     }
     if (t4_pl > 0) {
         bprint(PRINT_HIGH, "\n=------= Green team results =------=\n");
         tno = TeamFortress_TeamGetNoPlayers(4);
         st = ftos(tno);
-        bprint2(PRINT_HIGH, st, " players\n");
+        bprint(PRINT_HIGH, st, " players\n");
         st = ftos(team4frags);
-        bprint2(PRINT_HIGH, st, " frags, ");
+        bprint(PRINT_HIGH, st, " frags, ");
         st = ftos(t4_unacc);
-        bprint2(PRINT_HIGH, st, " unaccounted for\n");
+        bprint(PRINT_HIGH, st, " unaccounted for\n");
         st = ftos(team4score);
-        bprint2(PRINT_HIGH, st, " team score\n");
+        bprint(PRINT_HIGH, st, " team score\n");
     }
     te = find(world, classname, "player");
     while (te) {
@@ -866,7 +854,7 @@ void () TeamFortress_ShowIDs = {
         if (te.team_no == self.team_no) {
             got_one = 1;
             st = ftos(te.tf_id);
-            sprint2(self, 2, st, "\n");
+            sprint(self, 2, st, "\n");
         }
         te = find(te, classname, "ghost");
     }
@@ -951,7 +939,7 @@ void () PlayerNotReady = {
     if (self.stat_flags & PLAYER_READY) {
         self.stat_flags &= ~PLAYER_READY;
         UpdateReadyStatus();
-        bprint2 (2, self.netname, " is NOT ready anymore\n ");
+        bprint (2, self.netname, " is NOT ready anymore\n ");
         v_ready = (v_ready - 1);
         Broadcast_Players_NotReady();
     }
@@ -1130,21 +1118,21 @@ void () PlayerReady = {
     self.stat_flags |= PLAYER_READY;
     UpdateReadyStatus();
     v_ready = v_ready + 1;
-    bprint2 (3, self.netname, " is ready to start the match\n");
+    bprint (3, self.netname, " is ready to start the match\n");
     if(!CheckAllPlayersReady())
         Broadcast_Players_NotReady();
 };
 
 void () RemoveVotes = {
     if (self.bvote) {
-        bprint2(2, self.netname, " \swithdraws\s his/her vote\n");
+        bprint(2, self.netname, " \swithdraws\s his/her vote\n");
         self.bvote = 0;
         v_break = (v_break - 1);
     }
     if (self.stat_flags & PLAYER_READY) {
         self.stat_flags &= ~PLAYER_READY;
         UpdateReadyStatus();
-        bprint2(2, self.netname, " is NOT ready anymore\n ");
+        bprint(2, self.netname, " is NOT ready anymore\n ");
         v_ready = (v_ready - 1);
     }
 };

@@ -342,7 +342,7 @@ void () TeamFortress_CheckTeamCheats = {
             sk = TeamFortress_GetSkin(self.team_no, self.playerclass);
             if (st != sk) {
                 TeamFortress_SetSkin(self);
-                bprint2(PRINT_MEDIUM, self.netname,
+                bprint(PRINT_MEDIUM, self.netname,
                         " has been kicked for changing skin\n");
                 sprint(self, PRINT_HIGH,
                        "You have been kicked for changing your skin\n");
@@ -354,7 +354,7 @@ void () TeamFortress_CheckTeamCheats = {
         st = GetTeamName(self.team_no);
         if (st != infokey(self, "team")) {
             SetTeamName(self);
-            bprint2(PRINT_MEDIUM, self.netname,
+            bprint(PRINT_MEDIUM, self.netname,
                     " has been kicked for changing team\n");
             sprint(self, PRINT_HIGH,
                    "You have been kicked for changing your team\n");

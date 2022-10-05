@@ -1099,7 +1099,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                         ent = find(world, classname, "player");
                         while(ent) {
                             if(infokeyf(ent, INFOKEY_P_USERID) == farg2) {
-                                bprint4(PRINT_HIGH, ent, " was banned by ", self.netname, ".\n");
+                                bprint(PRINT_HIGH, ent.netname, " was banned by ", self.netname, ".\n");
                                 localcmd("addip ");
                                 localcmd(infokey(ent, INFOKEY_P_IP));
                                 localcmd("\n");
@@ -1122,7 +1122,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                         ent = find(world, classname, "player");
                         while(ent) {
                             if(infokeyf(ent, INFOKEY_P_USERID) == farg2) {
-                                bprint4(PRINT_HIGH, ent.netname, " was made spectator by ", self.netname, ". There's probably a good reason for this.\n");
+                                bprint(PRINT_HIGH, ent.netname, " was made spectator by ", self.netname, ". There's probably a good reason for this.\n");
                                 clientcommand(ent, "observe");
                                 break;
                             }

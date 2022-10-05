@@ -6,7 +6,7 @@ void () CamLock = {
         te = find(world, netname, self.netname);
         while (te) {
             if (te != self) {
-                sprint3(self, PRINT_HIGH, "Locked onto ", te.netname,
+                sprint(self, PRINT_HIGH, "Locked onto ", te.netname,
                         "\n");
                 self.enemy = te;
                 self.heat = vlen((self.enemy.origin - self.origin));
@@ -14,7 +14,7 @@ void () CamLock = {
             te = find(te, netname, self.netname);
         }
         if (self.enemy == world)
-            sprint2(self, PRINT_HIGH, te.netname, " not found\n");
+            sprint(self, PRINT_HIGH, te.netname, " not found\n");
     } else {
         sprint(self, PRINT_HIGH, "Removed lock\n");
         self.enemy = world;
@@ -242,7 +242,7 @@ void () CamDrop = {
     }
     prevte.camera_list = cam;
     st = ftos(tf);
-    sprint3(self, PRINT_HIGH, "Camera ", st, " dropped\n");
+    sprint(self, PRINT_HIGH, "Camera ", st, " dropped\n");
 };
 
 void () fadetoblack = {

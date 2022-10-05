@@ -2956,6 +2956,8 @@ void () CheckPowerups = {
 
 void () PlayerPostThink = {
     UpdateScoreboardInfo(self);
+    FOPlayer fop = (FOPlayer)self;
+    fop.RewindUpdate();
 
     if (self.view_ofs == '0 0 0') {
         return;
@@ -3041,10 +3043,12 @@ void () UpdateAllClientsTeamScores = {
 }
 
 //do not rely on csqcactive - it may misbehave when using `join` from spectator
-void (optional float csqcactive) ClientConnect = {
+void () ClientConnect = {
+    local float csqc_active = infokeyf(self, INFOKEY_P_CSQCACTIVE);
     local string st;
     local float got_one;
 
+    spawnfunc_FOPlayer();
     bprint(PRINT_HIGH, self.netname, " entered the game\n");
 
     self.motd = 0;
@@ -3194,7 +3198,7 @@ void () ClientDisconnect = {
     LogEventChangeClass(self, self.playerclass, 0, timeplayed);
     self.classtime = gametime;
 
-    bprint4(PRINT_HIGH, self.netname, " left the game with ", st,
+    bprint(PRINT_HIGH, self.netname, " left the game with ", st,
             " frags\n");
     FO_Sound(self, CHAN_BODY, "player/tornoff2.wav", 1, ATTN_NONE);
     self.has_disconnected = 1;

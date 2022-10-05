@@ -216,7 +216,7 @@ void () QuadRoundThink = {
 	if (!self.cnt2)	{
 		if ((self.cnt == 1) || (self.cnt == 5)) {
 			tmp = ftos (self.cnt);
-			bprint3(2, "\s[\s", tmp, "\s]\s minute");
+			bprint(2, "\s[\s", tmp, "\s]\s minute");
 			if (self.cnt != 1)
 				bprint(2, "s");
 			bprint(2, " remaining\n");
@@ -238,7 +238,7 @@ void () QuadRoundThink = {
 		fl = ceil (self.cnt2);
 		if (!(fl - self.cnt2)) {
 			tmp = ftos(self.cnt2);
-			bprint3(2, "\s[\s", tmp, "\s]\s second");
+			bprint(2, "\s[\s", tmp, "\s]\s second");
 			if ((self.cnt2 != 1))
 				bprint(2, "s");
 			bprint(2, " remaining\n");
@@ -455,8 +455,8 @@ void () StartQuadRound =
         }
 
 		bprint(2, "Rounds Over! Use \"cmd map <mapname>\" to go to the nextmap\n");
-		bprint2(2, "map will auto-restart in ", ftos(map_restart_time));
-		bprint2(2, " seconds\n");
+		bprint(2, "map will auto-restart in ", ftos(map_restart_time));
+		bprint(2, " seconds\n");
 		if (!clan_scores_dumped) {
             DumpClanScores();
             MapEndSequence();

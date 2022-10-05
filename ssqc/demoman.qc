@@ -19,19 +19,34 @@ void () TeamFortress_DetpackCountDown;
 void CheckStateQ3Goal(entity trig);
 
 float (float force) TeamFortress_DetonatePipebombs = {
-    local entity e;
-
     if (time < self.pipecooldown && !force)
-    {
-        return impulse_queue ? FALSE : TRUE;       
+        return impulse_queue ? FALSE : TRUE;
+
+    int count;
+    entity* pipes = find_list(classname, "pipebomb", EV_STRING, count);
+
+    float rewound = FALSE;
+    if (!force && count > 0)
+        rewound = AL_RewindPlayersExceptSelf(self.pipecooldown);
+
+    for (float i = 0; i < count; i++) {
+        if (pipes[i].owner == self) {
+            deathmsg = pipes[i].flags & FL_ONGROUND ? pipes[i].weapon :
+                                                      DMSG_GREN_PIPE_AIR;
+
+            T_RadiusDamage_Antilag(pipes[i], pipes[i].owner, 120, world);
+
+            // This maintains some sort of awful hack that we'll remove.
+            pipes[i].voided = 1;
+
+            RenderExplosion(pipes[i].origin);
+            RemoveDeferred(pipes[i]);
+        }
     }
 
-    e = find(world, classname, "pipebomb");
-    while (e != world) {
-        if (e.owner == self)
-            e.nextthink = time;
-        e = find(e, classname, "pipebomb");
-    }
+    if (rewound)
+        FOPlayer::RestoreAll();
+
     return TRUE;
 };
 

@@ -36,7 +36,7 @@ string (entity pl) getEntityNameOrLogin = {
 void (string evt) logevent = {
 	local string st = infokey (world, "event_debug");
 	if (stof(st) > 0) {
-		bprint2(PRINT_HIGH, evt, "\n");
+		bprint(PRINT_HIGH, evt, "\n");
 	}
 	fputs(logfilehandle, evt);
 }

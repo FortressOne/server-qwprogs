@@ -27,6 +27,12 @@ void () SUB_Remove = {
     dremove(self);
 };
 
+
+void RemoveDeferred(entity e) {
+    e.nextthink = time;
+    e.think = SUB_Remove;
+}
+
 void () SetMovedir = {
     if (self.angles == '0 -1 0')
         self.movedir = '0 0 1';

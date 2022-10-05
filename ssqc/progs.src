@@ -12,6 +12,7 @@ defs.qc
 ../share/commondefs.qc
 ../share/common_helpers.qc
 qw.qc
+antilag.qc
 events.qc
 roles.qc
 q3defs.qc
@@ -28,7 +29,6 @@ subs.qc
 combat.qc
 items.qc
 locfiles.qc
-antilag.qc
 weapons.qc
 world.qc
 client.qc

@@ -269,7 +269,7 @@ void (entity targ, entity attacker) KillSound = {
 };
 
 void (entity targ, entity inflictor, entity attacker,
-      float damage) T_Damage = {
+      float damage, float knock_damage) T_DamageKnock = {
     local vector dir;
     local entity oldself, te;
     local float save;
@@ -324,22 +324,22 @@ void (entity targ, entity inflictor, entity attacker,
     }
     if ((inflictor != world) && (targ.movetype == MOVETYPE_WALK)) {
 
-        targ.immune_to_check = time + (damage / 20);
+        targ.immune_to_check = time + (knock_damage / 20);
         dir = targ.origin - ((inflictor.absmin + inflictor.absmax) * 0.5);
         dir = normalize(dir);
-        if (((damage < 60) &&
+        if (((knock_damage < 60) &&
              ((attacker.classname == "player") &&
               (targ.classname == "player")))
             && (attacker.netname != targ.netname))
-            targ.velocity = targ.velocity + dir * damage * 11;
+            targ.velocity = targ.velocity + dir * knock_damage * 11;
         else
-            targ.velocity = targ.velocity + dir * damage * 8;
+            targ.velocity = targ.velocity + dir * knock_damage * 8;
 
         if (((rj > 1) &&
              ((attacker.classname == "player") &&
               (targ.classname == "player")))
             && (attacker.netname == targ.netname))
-            targ.velocity = (targ.velocity + ((dir * damage) * rj));
+            targ.velocity = (targ.velocity + ((dir * knock_damage) * rj));
     }
     if (targ.flags & FL_GODMODE)
         return;
@@ -395,8 +395,13 @@ void (entity targ, entity inflictor, entity attacker,
     self = oldself;
 };
 
-void (entity targ, entity inflictor, entity attacker, float damage,
-      float T_flags, float T_AttackType) TF_T_Damage = {
+void (entity targ, entity inflictor, entity attacker,
+      float damage) T_Damage = {
+    T_DamageKnock(targ, inflictor, attacker, damage, damage);
+}
+
+void TF_T_DamageKnock(entity targ, entity inflictor, entity attacker,
+      float damage, float knock_damage, float T_flags, float T_AttackType) {
     local vector dir;
     local entity oldself;
     local entity te;
@@ -405,6 +410,7 @@ void (entity targ, entity inflictor, entity attacker, float damage,
     local float olddmsg;
     local float no_damage;
     local float moment;
+    local float original_damage = damage;
 
     if (targ.takedamage == 0)
         return;
@@ -523,21 +529,20 @@ void (entity targ, entity inflictor, entity attacker, float damage,
         targ.dmg_inflictor = inflictor;
 
     }
-    if (!(T_AttackType & TF_TD_NOMOMENTUM)) {
+    knock_damage = floor(damage / original_damage * knock_damage);
+    if (!(T_AttackType & TF_TD_NOMOMENTUM) && knock_damage) {
         if ((inflictor != world) && (targ.movetype == MOVETYPE_WALK) && !(targ.tfstate & TFSTATE_CANT_MOVE)) {
             if (deathmsg != DMSG_GREN_NAIL && deathmsg != DMSG_GREN_SHOCK && deathmsg != DMSG_GREN_BURST) {
                 targ.immune_to_check = time + damage / 20;
                 dir = targ.origin - (inflictor.absmin + inflictor.absmax) * 0.5;
                 dir = normalize(dir);
-                moment = damage;
+                moment = knock_damage;
 
                 if (inflictor.classname == "pyro_rocket" && pyro_type == 1) {
-                    moment = damage * 1.25;
-
                     if (attacker == targ) {
-                        moment = damage * 1.5;
+                        moment *= 1.5;
                     } else {
-                        moment = damage * 1.25;
+                        moment *= 1.25;
                     }
                 }
 
@@ -691,6 +696,12 @@ void (entity targ, entity inflictor, entity attacker, float damage,
     self = oldself;
 };
 
+void TF_T_Damage(entity targ, entity inflictor, entity attacker,
+                 float damage, float T_flags, float T_AttackType) {
+    TF_T_DamageKnock(targ, inflictor, attacker, damage, damage,
+                     T_flags, T_AttackType);
+}
+
 void (entity inflictor, entity attacker, float damage,
       entity ignore) T_RadiusDamage = {
     local float points;
@@ -717,7 +728,8 @@ void (entity inflictor, entity attacker, float damage,
                             T_Damage(head, inflictor, attacker,
                                      points * 0.5);
                         else
-                            TF_T_Damage(head, inflictor, attacker, points,
+                            TF_T_DamageKnock(head, inflictor, attacker, points,
+                                        points,
                                         TF_TD_NOTTEAM, TF_TD_EXPLOSION);
                     }
                 }
@@ -726,6 +738,48 @@ void (entity inflictor, entity attacker, float damage,
         head = head.chain;
     }
 };
+
+
+// Implements T_RadiusDamage but with awareness that the rewound player position
+// for damage and the current player position for knockback may not be the
+// same.
+//
+// Will merge with RadiusDamage in time.
+void T_RadiusDamage_Antilag(entity inflictor, entity attacker, float damage,
+                            entity ignore) {
+    float dmg[2];
+    vector org[2];
+
+    int count;
+    entity* list = findradius_list(inflictor.origin, damage + 40, count);
+    for (int i = 0; i < count; i++) {
+        entity c = list[i];
+        if (c == ignore || !c.takedamage || !CanDamage(c, inflictor))
+            continue;
+
+        FOPlayer fc = (FOPlayer)c;
+
+        org[0] = c.origin + (c.mins + c.maxs) * 0.5;
+        org[1] = fc.TrueOrigin() + (c.mins + c.maxs) * 0.5;
+
+        for (int j = 0; j < 2; j++) {
+            float points = 0.5 * vlen(inflictor.origin - org[j]);
+            if (points < 0)
+                points = 0;
+            points = damage - points;
+            if (c == attacker)
+                points = points * 0.75;
+            dmg[j] = points;
+        }
+
+        fc.RestoreNow();  // Use current location for knockback, etc.
+        dmg[1] = min(dmg[0], dmg[1]);  // Limit Kerbal.
+
+        if (dmg[0] > 0)
+            TF_T_DamageKnock(c, inflictor, attacker, dmg[0], dmg[1],
+                             TF_TD_NOTTEAM, TF_TD_EXPLOSION);
+    }
+}
 
 void (entity attacker, float damage) T_BeamDamage = {
     local float points;

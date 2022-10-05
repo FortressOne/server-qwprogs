@@ -1421,7 +1421,7 @@ void () Menu_Admin =
                     s_menu2 = strcat( s_menu2, te.netname );                    
                 } 
                 else {
-                    s_menu2 = strcat( s_menu2, substr(te.netname,0,25));
+                    s_menu2 = strcat( s_menu2, substring(te.netname,0,25));
                 }
                 s_menu2 = Menu_Indent_line(s_menu2, 30);
             }
@@ -1446,7 +1446,7 @@ void () Menu_Admin =
                         s_menu2 = strcat( s_menu2, te.netname );                    
                     } 
                     else {
-                        s_menu2 = strcat( s_menu2, substr(te.netname,0,25));
+                        s_menu2 = strcat( s_menu2, substring(te.netname,0,25));
                     }
                     s_menu2 = Menu_Indent_line(s_menu2, 30);
                 }

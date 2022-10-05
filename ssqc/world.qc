@@ -110,8 +110,7 @@ void () worldspawn = {
         cvar_set("teamplay", "1");
 
     if (infokey(world, "starttime") == string_null) {
-        calltimeofday();
-        string timestamp = strcat(tod_year, tod_mon, tod_day, tod_hour, tod_min, tod_sec);
+        string timestamp = strftime(FALSE, "%Y%m%d%H%M%S");
         localcmd(strcat("serverinfo starttime \"", timestamp, "\"\n"));
     }
 
