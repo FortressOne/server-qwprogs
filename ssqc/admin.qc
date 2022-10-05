@@ -187,9 +187,25 @@ void () Admin_CeaseFire = {
     }
 };
 
+void NotifyPauseUnpause(float is_pause) {
+    entity p = find (world, classname, "player");
+    while (p) {
+        if (p.netname == "" || !infokeyf(p, INFOKEY_P_CSQCACTIVE))
+            continue;
+
+        msg_entity = p;
+        WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
+        WriteByte(MSG_MULTICAST, is_pause ? MSG_PAUSE : MSG_UNPAUSE);
+        multicast('0 0 0', MULTICAST_ONE_R_NOSPECS);
+
+        p = find(p, classname, "player");
+    }
+}
+
 void () Admin_Pause = {
     if (!is_paused) {
         setpause(1);
+        NotifyPauseUnpause(TRUE);
         is_paused = 1;
         cs_paused = 1;
         pause_actor = self.netname;

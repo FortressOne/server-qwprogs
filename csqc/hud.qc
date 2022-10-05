@@ -660,7 +660,7 @@ void Hud_DrawFlagStatusBar(string panelid)
     {
 		if (FlagInfoLines[i].id) 
         {
-	    alpha = FlagInfoLines[i].state == FLAGINFO_HOME ? cvar("fo_hud_idle_alpha") : 1;
+	    alpha = FlagInfoLines[i].state == FLAGINFO_HOME ? CVARF(fo_hud_idle_alpha) : 1;
 	    string icon = FlagInfoLines[i].icon.filename;
 	    vector iconcolour = FlagInfoLines[i].icon.colour;
         float bigfont = 8 * (Hud_Panels[HUD_PANEL_FLAGINFO].TextScale ? Hud_Panels[HUD_PANEL_FLAGINFO].TextScale : Hud_Panels[HUD_PANEL_FLAGINFO].Scale);

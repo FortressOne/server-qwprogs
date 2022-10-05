@@ -230,20 +230,6 @@ void Hud_DrawStringLMPThreshold(vector pos, string value, float size, float thre
     }
 }
 
-string FormatCfgString(string line, string field, string value)
-{
-    line = strcat(line, "\n", field, ":", value);
-
-    return line;
-}
-
-string FormatCfgVector(string line, string field, vector value)
-{
-    line = strcat(line, "\n", field, ":", strcat(ftos(value_x), ",", ftos(value_y)));
-
-    return line;
-}
-
 string GetPanelString(string line, string name)
 {
     line = FormatCfgVector(line, strcat(name, ".position"), DrawPanel.Position);
@@ -482,33 +468,4 @@ vector DrawOffsetString(string msg, vector size, vector fontSize, vector pos, ve
     drawstring(pos, msg, fontSize, colour, 1, 0);
 
     return pos;
-}
-
-void AddGrenTimer(float grentype, float offset) {
-    if (grentype == GR_TYPE_FLARE || grentype == GR_TYPE_CALTROP)
-        return;
-
-    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
-        if(FO_Hud_Grentimers[i].grentype == 0) {
-            StartGrenTimer(i, grentype, offset);
-            PlayGrenTimer(offset);
-            break;
-        }
-    }
-}
-
-void AddSilentGrenTimer(float grentype, float offset) {
-    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
-        if(FO_Hud_Grentimers[i].grentype == 0) {
-            StartGrenTimer(i, grentype, offset);
-            break;
-        }
-    }
-}
-
-void StartGrenTimer(float slot, float grentype, float offset) {
-    FO_Hud_Grentimers[slot].grentype = grentype;
-    FO_Hud_Grentimers[slot].icon_index = grentype;
-    FO_Hud_Grentimers[slot].alpha = 1;
-    FO_Hud_Grentimers[slot].expires = time + 3.8 - offset;
 }

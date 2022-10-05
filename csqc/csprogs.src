@@ -11,6 +11,7 @@ csextradefs.qc
 ../share/commondefs.qc
 ../share/common_helpers.qc
 ../share/common_vote.qc
+settings.qc
 sui_sys.qc
 vote.qc
 status.qc
@@ -19,6 +20,5 @@ main.qc
 events.qc
 hud_helpers.qc
 hud.qc
-settings.qc
 input.qc
 #endlist

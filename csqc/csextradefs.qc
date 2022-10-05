@@ -436,14 +436,77 @@ typedef struct {
 } FO_Hud_Settings;
 FO_Hud_Settings HudSettings;
 
-typedef struct {
-    float grentype;
-    float expires;
-    float icon_index;
-    float alpha;
-} FO_Hud_Grentimer;
+enumflags {
+    FL_GT_SOUND,
+    FL_GT_THROWN,
+    FL_GT_ADJPING
+};
 
-FO_Hud_Grentimer FO_Hud_Grentimers[5];
+class CsGrenTimer;
+CsGrenTimer grentimers[NUM_GREN_TIMERS];
+
+class CsGrenTimer {
+    float index_;
+    float primed_at_;
+    float expires_at_;
+    float flags_;
+    float grentype_;
+
+    nonvirtual float() index { return index_; };
+    nonvirtual float() active { return expires_at_ > time; };
+    nonvirtual float() expiry { return expires_at_; };
+    nonvirtual float() grentype { return grentype_; };
+    nonvirtual void() set_thrown { flags_ |= FL_GT_THROWN; };
+    nonvirtual float() is_thrown { return flags_ & FL_GT_THROWN; };
+    nonvirtual float() sound_offset {
+        float offset = max(3.8 - (expires_at_ - time), 0);
+        return offset;
+    };
+
+    nonvirtual void(float primed_at, float expires_at,
+                    float grentype, float timer_flags) Set;
+    nonvirtual void() Stop;
+
+    nonvirtual void() PauseSound {
+        if (flags_ & FL_GT_SOUND)  // -volume => stop.
+            soundupdate(this, CHAN_VOICE, "", -1, 0, 0, 0, 0);
+    };
+    nonvirtual void() StartSound;
+
+    static float next_index_;
+    static CsGrenTimer last_;
+
+    static void() Init {
+        for (float i = 0; i < grentimers.length; i++)
+            grentimers[i] = spawn(CsGrenTimer, index_: i);
+    };
+
+    static void() StopAll {
+        for (float i = 0; i < grentimers.length; i++)
+            grentimers[i].Stop();
+    };
+
+    static CsGrenTimer() GetNext {
+        next_index_ = (next_index_ + 1) % grentimers.length;
+        last_ = grentimers[next_index_];
+        return last_;
+    };
+    static void() SyncPause {
+        // Time froze, but sound kept running, realign.
+        for (float i = 0; i < grentimers.length; i++)
+            if (grentimers[i].active)
+                grentimers[i].PauseSound();
+    };
+
+    static void() SyncUnpause {
+        // Time froze, but sound kept running, realign.
+        for (float i = 0; i < grentimers.length; i++)
+            if (grentimers[i].active)
+                grentimers[i].StartSound();
+    };
+
+    static CsGrenTimer() GetLast { return last_; };
+};
 
 // scoreboard stuff
 typedef struct {
@@ -542,6 +605,7 @@ float grentimer_waiting;
 float jumpsound_cooldown;
 float last_pmove_onground;
 float last_vel_z;
+float last_death_time;
 
 vector FO_Hud_Icon_Size = [24, 24, 0];
 vector FO_Hud_Icon_Font_Size = [8, 8, 0];

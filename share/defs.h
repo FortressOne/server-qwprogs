@@ -173,11 +173,12 @@
 #define CHAN_ITEM	3
 #define CHAN_BODY	4
 #define CHAN_NO_PHS_ADD	8
-#define CHAN_GREN1	9
-#define CHAN_GREN2	10
-#define CHAN_GREN3	11
-#define CHAN_GREN4	12
-#define CHAN_GREN5	13
+
+// We can overlap these with regular channels since they play on the world ent.
+#define NUM_GREN_TIMERS 5 // We overlap channels when >3 active.
+#define CHAN_GREN_START 9
+#define CHAN_GREN_END 13
+// #define CHAN_GREN_END (CHAN_GREN_START + NUM_GREN_TIMERS - 1)
 
 #define ATTN_NONE	0
 #define ATTN_NORM	1

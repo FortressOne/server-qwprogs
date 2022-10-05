@@ -371,7 +371,7 @@ var fo_menu FO_MENU_DISPENSER_USE = {
 void updateAdminMenuInfo() = {
     if(admin_menu_next_update < time) {
         localcmd("cmd adminrefresh\n");
-        admin_menu_next_update = time + cvar(FOCMD_ADMIN_MENU_UPDATE_TIME);
+        admin_menu_next_update = time + CVARF(FOCMD_ADMIN_MENU_UPDATE_TIME);
     }
 }
 

@@ -796,13 +796,15 @@ string GetSBClassInfo(entity pl, float csqcactive)
     return st1;
 }
 
-void UpdateClientGrenadePrimed(entity pl, float grentype) = {
+void UpdateClientGrenadePrimed(entity pl, float grentype, float explodes_at) = {
     if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
         return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_GRENPRIMED);
-    WriteFloat(MSG_MULTICAST, grentype);
+    WriteByte(MSG_MULTICAST, grentype);
+    WriteFloat(MSG_MULTICAST, time);
+    WriteFloat(MSG_MULTICAST, explodes_at);
     multicast('0 0 0', MULTICAST_ONE_R_NOSPECS);
 }
 
@@ -821,7 +823,8 @@ void UpdateClientPlayerDie(entity pl) = {
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_PLAYERDIE);
-    multicast('0 0 0', MULTICAST_ONE_NOSPECS);
+    WriteFloat(MSG_MULTICAST, time);
+    multicast('0 0 0', MULTICAST_ONE_R_NOSPECS);
 }
 
 void UpdateClientIDString(entity pl) {

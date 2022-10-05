@@ -10,7 +10,6 @@ void Hud_WriteCfg(string path);
 void FO_LoadSettings();
 void FO_WriteSettings();
 void AddGrenTimer(float grentype, float offset);
-void ApplyTransparencyToGrenTimer();
 void StopGrenTimers();
 float IsValidToUseGrenades();
 void Sync_GameState();
@@ -28,17 +27,14 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 //         precache_pic(HudIcons[i].icon);
 //     }
 
+    CsGrenTimer::Init();
+
     registercommand("fo_hud_editor");
     registercommand("fo_hud_reload");
     registercommand("fo_hud_reset");
     registercommand("fo_hud");
     registercommand("fo_hud_save");
     registercommand("fo_hud_load");
-
-    registercvar(FOCMD_GRENTIMER, "1");
-    registercvar(FOCMD_GRENTIMERSOUND, "grentimer.wav");
-    registercvar(FOCMD_GRENTIMERVOLUME, "1");
-    registercvar(FOCMD_JUMPVOLUME, "1");
 
     registercommand("fo_menu_game");
     registercommand("fo_main_menu");
@@ -51,7 +47,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("fo_menu_build");
     registercommand("fo_menu_dropammo");
     registercommand("fo_menu_cancel");
-    registercvar(FOCMD_ADMIN_MENU_UPDATE_TIME, "2");
 
     registercommand("+aux_jump");
     registercommand("-aux_jump");
@@ -81,7 +76,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     registercommand("vote_addmap");
     registercommand("vote_removemap");
-    registercvar("fo_hud_idle_alpha", "0.3");
     for(float i = 0; i < MENU_OPTION.length - 1; i++) {
         registercvar(strcat("fo_menu_option_",MENU_OPTION[i]), MENU_OPTION[i]);
     }
@@ -142,7 +136,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
             if ((input_buttons & BUTTON2) && (pmove_vel_z < 180 /* not sliding */)) {
                 if (jumpsound_cooldown < time) {
                     jumpsound_cooldown = time + 0.01;
-                    localsound("player/plyrjmp8.wav", CHAN_BODY, cvar(FOCMD_JUMPVOLUME));
+                    localsound("player/plyrjmp8.wav", CHAN_BODY, CVARF(FOCMD_JUMPVOLUME));
                 }
             }
 
@@ -241,7 +235,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             Menu_Cancel();
             break;
         case "+fo_showscores":
-            if (cvar(FOCMD_OLDSCOREBOARD) == 1)
+            if (CVARF(FOCMD_OLDSCOREBOARD) == 1)
             {
                 tokenize(findkeysforcommand(argv(0)));
 
@@ -270,7 +264,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "+showscores":
         case "+showteamscores":
             showingscores = TRUE;
-            if (cvar(FOCMD_OLDSCOREBOARD) != 1)
+            if (CVARF(FOCMD_OLDSCOREBOARD) != 1)
             {
                 tokenize(findkeysforcommand(argv(0)));
 
@@ -446,29 +440,6 @@ float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
 
 void CSQC_Shutdown() = {
     FO_WriteSettings();
-}
-
-void ApplyTransparencyToGrenTimer() {
-    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
-        if (FO_Hud_Grentimers[i].grentype != 0 && FO_Hud_Grentimers[i].alpha != 0.3) {
-            FO_Hud_Grentimers[i].alpha = 0.3;
-            break;
-        }
-    }
-}
-
-void StopGrenTimers() {
-    soundupdate(self, CHAN_GREN1, "", 0, 0, 0, 0, 0);
-    soundupdate(self, CHAN_GREN2, "", 0, 0, 0, 0, 0);
-    soundupdate(self, CHAN_GREN3, "", 0, 0, 0, 0, 0);
-    soundupdate(self, CHAN_GREN4, "", 0, 0, 0, 0, 0);
-    soundupdate(self, CHAN_GREN5, "", 0, 0, 0, 0, 0);
-
-    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
-        FO_Hud_Grentimers[i].grentype = 0;
-        FO_Hud_Grentimers[i].expires = 0;
-        FO_Hud_Grentimers[i].icon_index = 0;
-    }
 }
 
 float last_servercommandframe;

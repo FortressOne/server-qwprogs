@@ -1,10 +1,6 @@
 void ParseSBAR();
-void ParseGrenPrimed(float grentype, float timertype);
-void AddGrenTimer(float grentype, float offset);
-void AddSilentGrenTimer(float grentype, float offset);
-void StartGrenTimer(float slot, float grentype, float offset);
-void AddGrenTimer(float grentype, float offset);
-void PlayGrenTimer(float offset);
+void ParseGrenPrimed(float grentype, float primed_at, float explodes_at);
+float StartGrenTimer(float primed_at, float expires_at, float grentype, float play_sound);
 
 void() CSQC_Parse_Event = {
     float msgtype = readbyte();
@@ -104,14 +100,17 @@ void() CSQC_Parse_Event = {
             SBAR.Identify = readstring();
             break;
         case MSG_GRENPRIMED:
-            float grentype = readfloat();
-            float timertype = cvar(FOCMD_GRENTIMER);
-            ParseGrenPrimed(grentype, timertype);
+            float grentype = readbyte();
+            float primed_at = readfloat();
+            float explodes_at = readfloat();
+            ParseGrenPrimed(grentype, primed_at, explodes_at);
             break;
         case MSG_GRENTHROWN:
-            ApplyTransparencyToGrenTimer();
+            CsGrenTimer last = CsGrenTimer::GetLast();
+            last.set_thrown();
             break;
         case MSG_PLAYERDIE:
+            last_death_time = readfloat();
             StopGrenTimers();
             break;
         case MSG_CLIENT_MENU:
@@ -302,48 +301,98 @@ void() CSQC_Parse_Event = {
         case MSG_VOTE_MAP_DELETE:
             RemoveVoteMap(readstring(), FALSE);
             break;
-    }
-}
-
-void PlayGrenTimer(float offset) {
-    local float channel = CHAN_GREN1;
-    local float soundtime;
-    local float highest_soundtime = -1;
-
-    for(float i = CHAN_GREN1; i <= CHAN_GREN5; i++) {
-        soundtime = getsoundtime(self, i);
-
-        if (soundtime < 0) {
-            channel = i;
+        case MSG_PAUSE:
+            CsGrenTimer::SyncPause();
             break;
-        }
-
-        if (soundtime > highest_soundtime) {
-            highest_soundtime = soundtime;
-            channel = i;
-        }
+        case MSG_UNPAUSE:
+            CsGrenTimer::SyncUnpause();
+            break;
     }
-
-    local string sound = cvar_string(FOCMD_GRENTIMERSOUND);
-    localsound(sound, channel, cvar(FOCMD_GRENTIMERVOLUME)); // required because soundupdate doesn't reset getsoundtime
-    soundupdate(self, channel, sound, cvar(FOCMD_GRENTIMERVOLUME), 0, 0, 0, offset);
 }
 
-void ParseGrenPrimed(float grentype, float timertype) {
-    if(timertype == 0) {
-        AddSilentGrenTimer(grentype, 0);
+DEFCVAR_FLOAT(fo_grentimer_debug, 0);
+
+string cached_timer;
+string GetGrenTimerSound() {
+    string wav = CVARS(FOCMD_GRENTIMERSOUND);
+
+    if (cached_timer != wav) {
+        precache_sound(wav);
+        cached_timer = wav;
+    }
+    return wav;
+}
+
+void CsGrenTimer::StartSound() {
+    if !(this.flags_ & FL_GT_SOUND)
         return;
+
+    string wav = GetGrenTimerSound();
+    float volume = CVARF(FOCMD_GRENTIMERVOLUME);
+
+    // Note there's a bug where soundupdate returns false for a new sample, even
+    // though it's started.
+    soundupdate(this, CHAN_VOICE, wav, volume, 0, 0, 0, sound_offset());
+}
+
+
+void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
+                      float timer_flags) {
+    grentype_ = _grentype;
+    primed_at_ = primed_at;
+    expires_at_ = expires_at;
+    flags_ = timer_flags;
+
+    if (this.flags_ & FL_GT_ADJPING) {
+        local float rtt =
+            getplayerkeyfloat(player_localnum, INFOKEY_P_PING) / 1000;
+        expires_at_ -= rtt/2;
     }
 
-    if(timertype == 1) {
-        AddGrenTimer(grentype, 0);
+    StartSound();
+}
+
+void CsGrenTimer::Stop() {
+    expires_at_ = -1;
+    PauseSound();  // Pause is really stop.
+    flags_ = 0;
+}
+
+void StopGrenTimers() {
+    // New style.
+    for (float i = 0; i < NUM_GREN_TIMERS; i++)
+        grentimers[i].Stop();
+}
+
+void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
+    if (grentype == GR_TYPE_FLARE || grentype == GR_TYPE_CALTROP)
         return;
+
+    if (primed_at < last_death_time)
+        return;
+
+    local float timer_flags = 0;
+    switch (CVARF(FOCMD_GRENTIMER)) {
+        case 0: break;
+        case 1: timer_flags = FL_GT_SOUND; break;
+        // 2 [and something sane for anything we don't recognize.]
+        default: timer_flags = FL_GT_SOUND | FL_GT_ADJPING; break;
     }
 
-    if(timertype == 2) {
-        local float offset = getplayerkeyfloat(player_localnum, INFOKEY_P_PING)/1000;
-        AddGrenTimer(grentype, offset);
-        return;
+    float debug_print_state = CVARF(fo_grentimer_debug) & 1;
+
+    CsGrenTimer timer = CsGrenTimer::GetNext();
+    timer.Set(primed_at, explodes_at, grentype, timer_flags);
+
+    if (debug_print_state) {
+        float ping = getplayerkeyfloat(player_localnum, INFOKEY_P_PING) / 1000;
+
+        float expires_old = time + 3.8 - ping;
+        float expires_new = timer.expiry();
+        float expires_ideal = explodes_at - ping/2;
+
+        print(sprintf("primed_at=%0.2f explodes_at=%0.2f fuse=%0.2f\n",
+                      primed_at, explodes_at, explodes_at - primed_at));
     }
 }
 
