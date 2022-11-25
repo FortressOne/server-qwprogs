@@ -487,10 +487,6 @@ void _Sync_ServerCommandFrame() {
     if (is_spectator)
         is_observer = FALSE;
 
-    vector vel = [getstatf(STAT_VELOCITY_X), getstatf(STAT_VELOCITY_Y),
-                  getstatf(STAT_VELOCITY_Z)];
-    speed = sqrt(vel.x * vel.x + vel.y * vel.y);
-
     local float health = getstatf(STAT_HEALTH);
     if (health <= 0 || player_class != PC_SNIPER) {
         zoomed_in = 0;

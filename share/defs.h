@@ -1507,14 +1507,11 @@ enumflags {
 #define STAT_TEAMNO             33
 #define STAT_FLAGS              34
 #define STAT_CLASS              35
-#define STAT_VELOCITY_X         36
-#define STAT_VELOCITY_Y         37
-#define STAT_VELOCITY_Z         38
-#define STAT_NO_GREN1           39
-#define STAT_NO_GREN2           40
-#define STAT_TP_GREN1           41
-#define STAT_TP_GREN2           42
-#define STAT_PAUSED             43
+#define STAT_NO_GREN1           36
+#define STAT_NO_GREN2           37
+#define STAT_TP_GREN1           38
+#define STAT_TP_GREN2           39
+#define STAT_PAUSED             40
 
 // Dimensions
 #define DMN_FLASH 1 // when flashed, we set dimension see to this

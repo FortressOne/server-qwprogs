@@ -580,7 +580,6 @@ float is_observer;
 float oldhealth;
 float painfinished;
 vector thisorigin;
-float speed;
 float jump_counter;
 float grentimer_waiting;
 float jumpsound_cooldown;

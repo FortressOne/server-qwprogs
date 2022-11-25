@@ -1157,7 +1157,7 @@ var FO_Hud_Panel Hud_Panels[] = {
     {"gun6","Grenade Launcher",           '-4 -90',  '36 24',  0.8,1.4,1,0, drawInvIconPanel, {return getGunIcon(IT_GRENADE_LAUNCHER);}, 0, 36},
     {"gun7","Rocket Launcher",            '-4 -70',  '36 24',  0.8,1.4,1,0, drawInvIconPanel, {return getGunIcon(IT_ROCKET_LAUNCHER);}, 0, 36},
     {"gun8","Lighning Gun",               '-4 -50',  '36 24',  0.8,1.4,1,0, drawInvIconPanel, {return getGunIcon(IT_LIGHTNING);}, 0, 36},
-    {"speed","Speed",                     '4 15',    '26 26',  1,1.4,0,0, drawTextPanel, {return CVARF(fo_fte_hud) ? sprintf("%3.1f UPS", speed) : "";}, 0, 4},
+    {"speed","Speed",                     '4 15',    '26 26',  1,1.4,0,0, drawTextPanel, {return CVARF(fo_fte_hud) ? sprintf("%3.1f UPS", vlen(pmove_vel)) : "";}, 0, 4},
 };
 
 //var FO_Hud_Panel Hud_ExtraPanels[] = {
