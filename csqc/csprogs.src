@@ -28,6 +28,7 @@ sui_sys.qc
 vote.qc
 status.qc
 settings.qc
+slots.qc
 menu.qc
 main.qc
 events.qc

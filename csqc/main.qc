@@ -22,36 +22,6 @@ void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
 }
 
-void PushToSlotHistory(float value) {
-    if (slot_history_top >= MAX_SLOT_HISTORY_SIZE) {
-        // Stack is full
-        return;
-    }
-
-    slot_history_top += 1;
-    slot_history[slot_history_top] = value;
-}
-
-float RemoveFromSlotHistory(float slot) {
-    if (slot_history_top == -1) {
-        // Stack is empty
-        return -1;
-    }
-
-    for (float i = slot_history_top; i >= 0; i--) {
-        if (slot_history[i] == slot) {
-            for (float j = i+1; j < MAX_SLOT_HISTORY_SIZE; j++) {
-                slot_history[j-1] = slot_history[j];
-            }
-
-            slot_history[MAX_SLOT_HISTORY_SIZE-1] = 0;
-            slot_history_top--;
-            break;
-        }
-    }
-}
-
-
 DECLARE_PERF_SAMPLER(frame_timing, 60, 0.1);
 DECLARE_PERF_SAMPLER(hud_timing, 60, 0.1);
 DECLARE_PERF_SAMPLER(hud_partial_timing, 60, 0.1);
@@ -204,24 +174,6 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
     // Work around bug in some versions of FTE.  See pmove.qc
     recent_pmove_vel_z = pmove_vel_z;
-}
-
-void Slot_Keydown(float slot) {
-    PushToSlotHistory(slot);
-    localcmd(sprintf("impulse %f\n", slot));
-    localcmd("+attack\n");
-}
-
-void Slot_Keyup(float slot) {
-    RemoveFromSlotHistory(slot);
-    if (slot_history_top >= 0) { // still holding another +slot bind
-        localcmd(sprintf("impulse %f\n", slot_history[slot_history_top]));
-    } else {
-        if (CVARF(fo_default_weapon)) {
-            localcmd(sprintf("impulse %f\n", CVARF(fo_default_weapon)));
-        }
-        localcmd("-attack\n");
-    }
 }
 
 noref float(string cmd) CSQC_ConsoleCommand = {
