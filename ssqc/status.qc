@@ -17,7 +17,6 @@ string(entity pl) SentryDetailsToString;
 string(entity pl) BuildingToString;
 string(float pc) TeamFortress_GetClassName;
 entity(float ino) Finditem;
-void () tfgoalitem_droptouch;
 void () tfgoalitem_dropthink;
 void () tfgoalitem_remove;
 float (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSetting;
@@ -665,23 +664,18 @@ void (entity Player, entity Item) UpdateClientFlagStatus = {
         if (Item.origin != Item.oldorigin) {
             if((Item.nextthink - time) >= 0) {
                 WriteFloat(MSG_MULTICAST, FLAGINFO_DROPPED);
-                if(Item.think != tfgoalitem_droptouch) {
-                    if(noreturn) {
-                        WriteFloat(MSG_MULTICAST, -1);
-                    } else {
-                        WriteFloat(MSG_MULTICAST, rint(Item.bubble_count - time));
-                    }
-                    if((Item.think == tfgoalitem_dropthink || Item.think == tfgoalitem_remove) && !Item.owner) {
-                        WriteFloat(MSG_MULTICAST, FLAGINFO_LOCATION);
-                        WriteCoord(MSG_MULTICAST, Item.origin_x);
-                        WriteCoord(MSG_MULTICAST, Item.origin_y);
-                        WriteCoord(MSG_MULTICAST, Item.origin_z);
-                        WriteString(MSG_MULTICAST, getLocationName(Item.origin));
-                    } else {
-                        WriteFloat(MSG_MULTICAST, FLAGINFO_NOLOCATION);
-                    }
-                } else {
+                if(noreturn) {
                     WriteFloat(MSG_MULTICAST, -1);
+                } else {
+                    WriteFloat(MSG_MULTICAST, rint(Item.bubble_count - time));
+                }
+                if((Item.think == tfgoalitem_dropthink || Item.think == tfgoalitem_remove) && !Item.owner) {
+                    WriteFloat(MSG_MULTICAST, FLAGINFO_LOCATION);
+                    WriteCoord(MSG_MULTICAST, Item.origin_x);
+                    WriteCoord(MSG_MULTICAST, Item.origin_y);
+                    WriteCoord(MSG_MULTICAST, Item.origin_z);
+                    WriteString(MSG_MULTICAST, getLocationName(Item.origin));
+                } else {
                     WriteFloat(MSG_MULTICAST, FLAGINFO_NOLOCATION);
                 }
             } else {
@@ -724,7 +718,7 @@ string (entity Player, entity Item, float teamno) GetItemStatus = {
         if (Item.origin != Item.oldorigin) {
             //When the item is thrown, there is a touch think with a pad of 4.25s before the normal timer kicks in
             if((Item.nextthink - time) >= 0) {
-                if(Item.think != tfgoalitem_droptouch && !noreturn) {
+                if(!noreturn) {
                     st = strcat(st, Q"\s: Return: \s", ftos(rint(Item.bubble_count - time)));
                 } else {
                     st = strcat(st, Q"\s: Dropped\s");

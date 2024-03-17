@@ -87,8 +87,8 @@ void () TeamFortress_Discard = {
 		self.ammo_cells = 0;
     }
     FO_Sound(self, CHAN_AUTO, "weapons/lock4.wav", 1, ATTN_NORM);
-    newmis.enemy = self;
-    newmis.health = time;
+    newmis.dropped_by = self;
+    newmis.dropped_at = time;
     newmis.weapon = 0;
     newmis.movetype = MOVETYPE_TOSS;
     newmis.solid = SOLID_TRIGGER;

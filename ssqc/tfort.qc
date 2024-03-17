@@ -2237,8 +2237,8 @@ void (float type, float ammo) TeamFortress_DropAmmo = {
         newmis.ammo_rockets = ammo;
     else if (newmis.weapon == 4)
         newmis.ammo_cells = ammo;
-    newmis.enemy = self;
-    newmis.health = time;
+    newmis.dropped_by = self;
+    newmis.dropped_at = time;
     newmis.movetype = 6;
     newmis.solid = 1;
     newmis.classname = "ammobox";
@@ -2267,7 +2267,7 @@ void () TeamFortress_AmmoboxTouch = {
     local string quantity;
 
     took = 0;
-    if ((other == self.enemy) && (time < (self.health + 2)))
+    if ((other == self.dropped_by) && (time < (self.dropped_at + 2)))
         return;
     if ((other.tfstate & TFSTATE_CANT_MOVE) || (other.tfstate & TFSTATE_AIMING))
         return;

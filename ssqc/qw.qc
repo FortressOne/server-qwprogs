@@ -261,6 +261,8 @@ float coop;
 .float group_no;                // Goal group this goal is in
 .float goal_state;              // State of this goal
 .float owned_by;                // The team this goal/item/whatever belongs to
+.float dropped_at;              // Time when item was dropped
+.entity dropped_by;             // Entity that last held item
 
 // Goal Activation details
 .float goal_activation;         // Bitfields. Determines how this goal is activated
