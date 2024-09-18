@@ -48,9 +48,6 @@ void () UseSpecialSkill = {
         case PC_SCOUT:
             self.impulse = TF_DASH;
             break;
-        case PC_SNIPER:
-            self.impulse = TF_ZOOMTOGGLE;
-            break;
         case PC_DEMOMAN:
             self.impulse = TF_PB_DETONATE;
             break;
@@ -1132,85 +1129,73 @@ string (float tn) TeamFortress_GetColorSkin = {
     return s;
 }
 
-string(float tn, float pc) TeamFortress_GetSkin =
-{
+string(float pc) TeamFortress_GetSkin = {
     local string skin = "base";
 
-    string col;
-    col = TeamFortress_GetColorSkin(tn);
-
-    switch (pc)
-    {
+    switch (pc) {
         case 1:
-            skin = strcat(col, "_sco");
+            skin = "fo_scout";
             break;
         case 2:
-            skin = strcat(col, "_sni");
+            skin = "fo_snipe";
             break;
         case 3:
-            skin = strcat(col, "_sol");
+            skin = "fo_sold";
             break;
         case 4:
-            skin = strcat(col, "_dem");
+            skin = "fo_demo";
             break;
         case 5:
-            skin = strcat(col, "_med");
+            skin = "fo_medic";
             break;
         case 6:
-            skin = strcat(col, "_hwg");
+            skin = "fo_hwguy";
             break;
         case 7:
-            skin = strcat(col, "_pyr");
+            skin = "fo_pyro";
             break;
         case 8:
-            skin = strcat(col, "_spy");
+            skin = "fo_spy";
             break;
         case 9:
-            skin = strcat(col, "_eng");
+            skin = "fo_eng";
             break;
         case 11:
-            skin = strcat(col, "_civ");
+            skin = "fo_civ";
             break;
-
     }
+
     return skin;
 };
 
-void (entity p) TeamFortress_SetSkin = {
-    local string st;
+void (entity player) TeamFortress_SetSkin = {
+    player.immune_to_check = time + 10;
 
-    p.immune_to_check = time + 10;
-    
-    if (p.playerclass == PC_SPY || p.last_playerclass == PC_SPY)
-    {
-        if (!p.is_undercover)
-        {
-            stuffcmd(p, "skin ");
-            st = TeamFortress_GetSkin(p.team_no, p.playerclass);
-            stuffcmd(p, st);
-            stuffcmd(p, "\n");
-            // please fix mvd recording
-            forceinfokey(p, "skin", st);
-        }
-        Spy_SetClientSkins(p);
+    if (player.playerclass == PC_SPY && player.is_undercover) {
+        Spy_SetClientSkins(player);
+        return;
     }
-    else
-    {
-        p.skin = p.playerclass;
-    
-        if (p.skin != 0) {
-            stuffcmd(p, "skin ");
-            st = TeamFortress_GetSkin(p.team_no, p.playerclass);
-            stuffcmd(p, st);
-            stuffcmd(p, "\n");
 
-            // please fix mvd recording
-            forceinfokey(p, "skin", st);
-        } 
-        else
-        {
-            stuffcmd(p, "skin base\n");
-        }
+    player.skin = player.playerclass;
+
+    if (player.skin != 0) {
+        player.needs_skin_update = 1;
+        local string sk = TeamFortress_GetSkin(player.playerclass);
+        forceinfokey(player, "skin",  sk);
+        stuffcmd(player, sprintf("skin %s\n", sk));
+
+        local string col = TeamFortress_TeamGetColor(player.team_no);
+        forceinfokey(player, "bottomcolor", col);
+        stuffcmd(player, sprintf("setinfo bottomcolor %s\n", col));
+        forceinfokey(player, "topcolor", col);
+        stuffcmd(player, sprintf("setinfo topcolor %s\n", col));
+    } else {
+        forceinfokey(player, "skin", "base");
+        stuffcmd(player, sprintf("skin %s\n", "base"));
+        forceinfokey(player, "bottomcolor", NOTEAMCOLOR);
+        stuffcmd(player, sprintf("bottomcolor %s\n", NOTEAMCOLOR));
+        forceinfokey(player, "topcolor", NOTEAMCOLOR);
+        stuffcmd(player, sprintf("topcolor %s\n", NOTEAMCOLOR));
     }
 };
 
@@ -1223,11 +1208,11 @@ void () TeamFortress_SetEquipment = {
         return;
 
     Team_Role * role = GetTeamRole(self.team_no);
-    
+
     kept_items = self.tf_items & (IT_KEY1 | IT_KEY2);
 
     if (!remember_weapon || self.last_playerclass != self.playerclass ||
-        (self.tfstate & TFSTATE_RANDOMPC)) {
+            (self.tfstate & TFSTATE_RANDOMPC)) {
         self.current_slot = SlotMelee;
         self.last_slot = SlotNull;
     }
@@ -1246,11 +1231,11 @@ void () TeamFortress_SetEquipment = {
         self.immune_to_check = time + 10;
         self.undercover_team = 0;
         stuffcmd(self, "color ");
-        st = ftos(TeamFortress_TeamGetColor(self.team_no) - 1);
+        st = TeamFortress_TeamGetColor(self.team_no);
         stuffcmd(self, st);
         stuffcmd(self, "\n");
     }
-    self.is_building = 0;
+    self.is_building = FALSE;
     self.is_detpacking = 0;
     self.airblast_cooldown = 0;
     self.is_undercover = 0;
@@ -1732,7 +1717,7 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_cells = PC_SPY_MAXAMMO_CELL;
         self.max_grenades_1 = role.gren1_limits[8];
         self.max_grenades_2 = role.gren2_limits[8];
-        
+
         self.tf_items = PC_SPY_TF_ITEMS;
 
         self.armorclass = self.armorclass | PC_SPY_INITARMORCLASS;
@@ -1963,7 +1948,7 @@ void () TeamFortress_RemoveTimers = {
         TeamFortress_EngineerBuildStop();
     }
 
-    self.is_building = 0;
+    self.is_building = FALSE;
     self.building = world;
     if (self.tfstate & TFSTATE_AIMING) {
         self.tfstate &= ~TFSTATE_AIMING;
@@ -1993,16 +1978,16 @@ void () TeamFortress_RemoveTimers = {
     while (te) {
         if (te.owner == self) {
             if (!(te.goal_activation & TFGI_KEEP) ||
-                (self.has_disconnected == 1)) {
+                    (self.has_disconnected == 1)) {
                 tfgoalitem_RemoveFromPlayer(te, self, 0);
             }
             if (CTF_Map == 1) {
                 if (te.goal_no == 1) {
                     bprint(PRINT_HIGH, self.netname,
-                           Q" \stook\s the \sblue\s flag!\n");
+                            Q" \stook\s the \sblue\s flag!\n");
                 } else if (te.goal_no == 2) {
                     bprint(PRINT_HIGH, self.netname,
-                           Q" \stook\s the \sred\s flag!\n");
+                            Q" \stook\s the \sred\s flag!\n");
                 }
             }
         }
@@ -2065,7 +2050,7 @@ void (float Suicided) TeamFortress_SetupRespawn = {
         if (self.lives != -1) {
             if (self.lives == 0) {
                 sprint(self, PRINT_HIGH,
-                       "No lives left, returning to observer mode\n");
+                        "No lives left, returning to observer mode\n");
                 self.playerclass = PC_UNDEFINED;
                 self.tfstate =
                     self.tfstate - (self.tfstate & TFSTATE_RANDOMPC);
@@ -2142,7 +2127,7 @@ void () TeamFortress_CheckClassStats = {
     // Check health
     if ((self.health > self.max_health) && !(self.items & IT_SUPERHEALTH))
         TF_T_Damage(self, world, world, self.max_health - self.health, 0,
-                    TF_TD_NOSOUND);
+                TF_TD_NOSOUND);
     if (self.health < 0)
         T_Heal(self, self.health - self.health, 0);
 
@@ -2166,11 +2151,11 @@ void (float type, float ammo) TeamFortress_DropAmmo = {
         if (self.ammo_shells < ammo) {
             if (self.playerclass == PC_ENGINEER) {
                 if ((self.ammo_cells / AMMO_COST_SHELLS) >=
-                    (ammo - self.ammo_shells)) {
+                        (ammo - self.ammo_shells)) {
                     sprint(self, PRINT_HIGH, "You make some shells\n");
                     self.ammo_cells =
                         self.ammo_cells - (ammo -
-                                           self.ammo_shells) *
+                                self.ammo_shells) *
                         AMMO_COST_SHELLS;
                     self.ammo_shells = ammo;
                 }
@@ -2184,11 +2169,11 @@ void (float type, float ammo) TeamFortress_DropAmmo = {
         if (self.ammo_nails < ammo) {
             if (self.playerclass == PC_ENGINEER) {
                 if ((self.ammo_cells / AMMO_COST_NAILS) >=
-                    (ammo - self.ammo_nails)) {
+                        (ammo - self.ammo_nails)) {
                     sprint(self, PRINT_HIGH, "You make some nails\n");
                     self.ammo_cells =
                         self.ammo_cells - (ammo -
-                                           self.ammo_nails) *
+                                self.ammo_nails) *
                         AMMO_COST_NAILS;
                     self.ammo_nails = ammo;
                 }
@@ -2202,11 +2187,11 @@ void (float type, float ammo) TeamFortress_DropAmmo = {
         if (self.ammo_rockets < ammo) {
             if (self.playerclass == PC_ENGINEER) {
                 if ((self.ammo_cells / AMMO_COST_ROCKETS) >=
-                    (ammo - self.ammo_rockets)) {
+                        (ammo - self.ammo_rockets)) {
                     sprint(self, PRINT_HIGH, "You make some rockets\n");
                     self.ammo_cells =
                         self.ammo_cells - (ammo -
-                                           self.ammo_rockets) *
+                                self.ammo_rockets) *
                         AMMO_COST_ROCKETS;
                     self.ammo_rockets = ammo;
                 }
@@ -2220,11 +2205,11 @@ void (float type, float ammo) TeamFortress_DropAmmo = {
         if (self.ammo_cells < ammo) {
             if (self.playerclass == PC_ENGINEER) {
                 if ((self.ammo_cells / AMMO_COST_CELLS) >=
-                    (ammo - self.ammo_cells)) {
+                        (ammo - self.ammo_cells)) {
                     sprint(self, PRINT_HIGH, "You make some cells\n");
                     self.ammo_cells =
                         self.ammo_cells - (ammo -
-                                           self.ammo_cells) *
+                                self.ammo_cells) *
                         AMMO_COST_CELLS;
                     self.ammo_cells = ammo;
                 }
@@ -2299,7 +2284,7 @@ void () TeamFortress_AmmoboxTouch = {
             self = other;
             return;
         } else if ((other.playerclass == PC_SCOUT)
-                    || (other.playerclass == PC_ENGINEER)) {
+                || (other.playerclass == PC_ENGINEER)) {
             if (!(self.ammo_shells + self.ammo_nails + self.ammo_cells)) {
                 other.nopickup = self;
                 return;
@@ -2311,8 +2296,8 @@ void () TeamFortress_AmmoboxTouch = {
             other.ammo_cells = other.ammo_cells + self.ammo_cells;
             self.ammo_cells = 0;
         } else if ((other.playerclass == PC_SNIPER)
-                    || (other.playerclass == PC_SPY)
-                    || (other.playerclass == PC_MEDIC)) {
+                || (other.playerclass == PC_SPY)
+                || (other.playerclass == PC_MEDIC)) {
             if (!(self.ammo_shells + self.ammo_nails)) {
                 other.nopickup = self;
                 return;
@@ -2322,7 +2307,7 @@ void () TeamFortress_AmmoboxTouch = {
             other.ammo_nails = other.ammo_nails + self.ammo_nails;
             self.ammo_nails = 0;
         } else if ((other.playerclass == PC_SOLDIER)
-                    || (other.playerclass == PC_DEMOMAN)) {
+                || (other.playerclass == PC_DEMOMAN)) {
             if (!(self.ammo_shells + self.ammo_rockets)) {
                 other.nopickup = self;
                 return;
@@ -2611,7 +2596,7 @@ void () TeamFortress_CheckforCheats = {
         bprint(PRINT_MEDIUM, self.owner.netname,
                 " has been kicked for cheating\n");
         sprint(self.owner, PRINT_HIGH,
-               "You have been kicked for cheating, because of your speed\n");
+                "You have been kicked for cheating, because of your speed\n");
         KickCheater(self.owner);
     }
 };

@@ -121,9 +121,10 @@ void (entity targ, entity attacker) Killed = {
     ClientObituary(self, attacker);
     self.takedamage = DAMAGE_NO;
     self.touch = SUB_Null;
-
     monster_death_use();
+
     self.th_die();
+
     self = oself;
     if(duelmode && targ.classname == "player" && !cb_prematch) {
         //Already in no fire mode - implies you're not the first to die
@@ -716,7 +717,6 @@ void TF_T_Damage(entity targ, entity inflictor, entity attacker,
         BroadcastHitFlag(targ, inflictor, attacker, original_damage, damh);
 
     if (targ.health <= 0) {
-
         if ((inflictor.classname == "detpack")
             && (inflictor.is_disarming) && (inflictor.enemy == targ))
             deathmsg = DMSG_DETPACK_DIS;

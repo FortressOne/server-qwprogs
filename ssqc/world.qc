@@ -86,6 +86,8 @@ void WorldSpawnPost()
 }
 
 void () worldspawn = {
+    whichpack("textures/skins/fo_scout.png", 1); // ensures that fo_skins.pk3 is sent
+
     // Set this variable on connect so the client knows it has access to
     // FortressOne aliases.
     WriteByte(MSG_INIT, 9/*svc_stufftext*/);
@@ -333,6 +335,7 @@ void () worldspawn = {
     clientstat(STAT_ALL_TIME, EV_FLOAT, all_time);
     clientstat(STAT_FLAGS, EV_FLOAT, stat_flags);
     clientstat(STAT_SPAWN_GEN, EV_FLOAT, spawn_gen);
+    clientstat(STAT_HAS_SENTRY, EV_FLOAT, has_sentry);
 
     globalstat(STAT_ROUND_END, EV_FLOAT, "round_end_time");
     globalstat(STAT_PAUSED, EV_FLOAT, "cs_paused");

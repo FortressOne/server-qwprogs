@@ -439,6 +439,8 @@ void () GibPlayer = {
 };
 
 void () PlayerDie = {
+    UpdateClientPlayerDie(self);
+
     self.spawn_gen += 1;
     self.last_death_ctime = self.client_time;
 

@@ -16,6 +16,12 @@ void FO_Hud_Init();
 float InFluid(vector point);
 float CalculateWaterLevel();
 void RenderHitTexts();
+entity sentry_preview;
+entity sentry_preview_range_sphere;
+float sentry_preview_offset;
+float previewing_sentry;
+float prevent_firing;
+float sentry_fits;
 
 void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
@@ -58,7 +64,6 @@ float RemoveFromSlotHistory(float slot) {
     }
 }
 
-
 static void BindAlias(TFAlias* tfa) {
     if (tfa->impulse == 0 && tfa->cmd == "")  // Some aliases are !csqc-only
         return;
@@ -90,7 +95,6 @@ void ClientSettings_Check();
 noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     print("CSQC Started\n");
 
-    //    precache_model("progs/weapons/v_rock.mdl");
 
     //     for (float i = 0; i < HudIcons.length; i++) {
     //         precache_pic(HudIcons[i].icon);
@@ -105,6 +109,12 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     Predict_InitDefaultConfig();
     FO_Predict_Init();
     CsGrenTimer::Init();
+
+    registercommand("specialup");
+    registercommand("specialdown");
+
+    registercommand("zoomin");
+    registercommand("zoomout");
 
     registercommand("+slot");
     registercommand("-slot");
@@ -180,6 +190,20 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     FO_Menu_Game(TRUE);
 
     pengine.view_mask = MASK_VIEWMODEL;  // Start with engine models.
+
+    precache_model("progs/turrpreview.mdl");
+    sentry_preview = spawn();
+    setmodel(sentry_preview, "progs/turrpreview.mdl");
+    sentry_preview.alpha = 0.25;
+
+    precache_model("progs/sphere.mdl");
+    sentry_preview_range_sphere = spawn();
+    setmodel(sentry_preview_range_sphere, "progs/sphere.mdl");
+    sentry_preview_range_sphere.scale = 1000;
+    sentry_preview_range_sphere.alpha = 0.02;
+
+    zoom_scale = 1;
+
     print("CSQC initialization finished\n");
 };
 
@@ -203,11 +227,11 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     float fts = perf_start_sample(&frame_timing);
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
-    setproperty(VF_DRAWCROSSHAIR, 1);		 // we want to draw our crosshair!
+
     FO_CussView();
 
-    if (zoomed_in)
-        setviewprop(VF_AFOV, CVARF(fov)/3);
+    setviewprop(VF_AFOV, CVARF(fov)/zoom_scale);
+    setsensitivityscaler(1/zoom_scale);
 
     // Draw original sbar, viewsize honoured automatically.
     if (!CVARF(fo_fte_hud) || CVARF(fo_legacy_sbar))
@@ -220,6 +244,22 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
     if (PM_Enabled())
         PM_UpdateView();
+
+    if (previewing_sentry) {
+        makevectors(view_angles);
+        local vector v_forward_sentry;
+        v_forward_sentry.z = (normalize(v_forward) * 64).z;
+        v_forward_z = 0;
+        local vector xy_pos = normalize(v_forward) * 64;
+        v_forward_sentry.x = xy_pos.x;
+        v_forward_sentry.y = xy_pos.y;
+
+        sentry_preview.origin = PM_Org() + v_forward_sentry;
+        sentry_preview_range_sphere.origin = sentry_preview.origin;
+        sentry_preview.angles_y = anglemod(view_angles_y + sentry_preview_offset);
+    } else {
+        setproperty(VF_DRAWCROSSHAIR, 1);       // we want to draw our crosshair!
+    }
 
     renderscene();
 
@@ -252,6 +292,14 @@ void Slot_Keyup(float slot) {
         localcmd("-attack\n");
 }
 
+void ZoomIn() {
+    zoom_scale = min(zoom_scale + 1, 5);
+}
+
+void ZoomOut() {
+    zoom_scale = max(zoom_scale - 1, 1);
+}
+
 void W_ChangeToSlotAlternate(string opt1, string opt2, string opt3, string opt4);
 
 noref float(string cmd) CSQC_ConsoleCommand = {
@@ -261,6 +309,46 @@ noref float(string cmd) CSQC_ConsoleCommand = {
     local float grentype;
 
     switch(argv(0)) {
+        case "specialup":
+            switch (WP_PlayerClass()) {
+                case PC_SNIPER:
+                    ZoomIn();
+                    break;
+                case PC_SPY:
+                    localcmd("cmd disguise prev\n");
+                    break;
+                case PC_ENGINEER:
+                    if (previewing_sentry) {
+                        sentry_preview_offset = anglemod(sentry_preview_offset - 15);
+                    } else {
+                        localcmd("cmd sentry rotate 15\n");
+                    }
+                    break;
+            }
+            break;
+        case "specialdown":
+            switch (WP_PlayerClass()) {
+                case PC_SNIPER:
+                    ZoomOut();
+                    break;
+                case PC_SPY:
+                    localcmd("cmd disguise next\n");
+                    break;
+                case PC_ENGINEER:
+                    if (previewing_sentry) {
+                        sentry_preview_offset = anglemod(sentry_preview_offset + 15);
+                    } else {
+                        localcmd("cmd sentry rotate -15\n");
+                    }
+                    break;
+            }
+            break;
+        case "zoomin":
+            ZoomIn();
+            break;
+        case "zoomout":
+            ZoomOut();
+            break;
         case "+slot":
             Slot_Keydown(stof(argv(1)));
             break;
@@ -531,11 +619,11 @@ static vector FO_Conc_Offset() {
     float i, rot = 0;
 
     if (!IsClownMode(CLOWN_CONC)) {
-            table = conc_curve;
-            len = conc_curve.length;
+        table = conc_curve;
+        len = conc_curve.length;
     } else {
-            table = clown_curve;
-            len = clown_curve.length;
+        table = clown_curve;
+        len = clown_curve.length;
     }
 
     for (i = 0; i < len - 1; i++) {
@@ -621,6 +709,7 @@ static void UpdateTeamColorCrosshair() {
             break;
         case 4:
             crosshair_color = "0x00ff00";
+            break;
     }
     localcmd("crosshaircolor ", crosshair_color, "\n");
     crosshair_team_no = team_no;
@@ -633,7 +722,7 @@ void FO_ApplyCussInput() {
     float modify_forward = TRUE;
 
     if ((!pmove_onground && (fo_config.fo_concuss & FOC_EASY_AIR)) ||
-        (pmove_onground && (fo_config.fo_concuss & FOC_EASY_GROUND)))
+            (pmove_onground && (fo_config.fo_concuss & FOC_EASY_GROUND)))
         modify_forward = input_buttons & BUTTON0;
 
     if (modify_forward) {
@@ -645,23 +734,106 @@ void FO_ApplyCussInput() {
 
 void PM_InputFrame();
 
+void SentryPreviewStart() {
+    sentry_preview_offset = 0;
+    sentry_preview.angles_y = input_angles_y;
+    sentry_preview.drawmask = MASK_ENGINE;
+
+    local vector sphere_colormod = '1 1 1';
+    switch (team_no) {
+        case 1:
+            sphere_colormod = '0 0.4 1';
+            break;
+        case 2:
+            sphere_colormod = '1 0 0';
+            break;
+        case 3:
+            sphere_colormod = '1 1 0';
+            break;
+        case 4:
+            sphere_colormod = '0 1 0';
+            break;
+    }
+
+    sentry_preview_range_sphere.colormod = sphere_colormod * 4;
+    sentry_preview_range_sphere.drawmask = MASK_ENGINE;
+
+    previewing_sentry = TRUE;
+    prevent_firing = TRUE;
+}
+
+void SentryPreviewStop() {
+    previewing_sentry = FALSE;
+    sentry_preview.drawmask = 0;
+    sentry_preview_range_sphere.drawmask = 0;
+}
+
 noref void CSQC_Input_Frame() {
+    local float changed_buttons = input_buttons ^ oldbuttons;
+    oldbuttons = input_buttons;
+
+    local float keydowns = changed_buttons & input_buttons;
+    local float keyups = changed_buttons & ~input_buttons;
+
     Sync_GameState();
 
-    // Intercept rocket jump;
-    if ((WP_PlayerClass() == PC_SOLDIER || WP_PlayerClass() == PC_PYRO) &&
-        (input_buttons & BUTTON4))
-        input_buttons |= BUTTON0 | BUTTON2;
+    switch (WP_PlayerClass()) {
+        case PC_SNIPER:
+            if (keydowns & BUTTON3) {
+                if (zoom_scale == 1) {
+                    zoom_scale = 3;
+                } else {
+                    zoom_scale = 1;
+                }
+            }
+            break;
+        case PC_SOLDIER:
+        case PC_PYRO:
+            // Intercept rocket jump
+            if (input_buttons & BUTTON4) {
+                input_buttons |= BUTTON0 | BUTTON2;
+            }
+            break;
+        case PC_ENGINEER:
+            // Intercept sentry build
+            if (!getstatf(STAT_HAS_SENTRY) && getstatf(STAT_CELLS) >= 130 && game_state.is_alive && !prematch) {
+                if (input_buttons & BUTTON4) {
+                    if (keydowns & BUTTON4) {
+                        if (!previewing_sentry) {
+                            SentryPreviewStart();
+                        } else {
+                            SentryPreviewStop();
+                        }
+                    }
 
-    // Handle zoom
-    float prev_zoomed_in = zoomed_in;
-    if (WP_PlayerClass() == PC_SNIPER)
-        zoomed_in = input_buttons & BUTTON3;
-    else
-        zoomed_in = 0;
+                    input_buttons = input_buttons - BUTTON4;
+                }
 
-    if (prev_zoomed_in != zoomed_in)
-        setsensitivityscaler(zoomed_in ? 1/3 : 1);
+                if (previewing_sentry) {
+                    if (keydowns & BUTTON0) {
+                        if (sentry_fits) {
+                            localcmd(sprintf("cmd build sentry %f\n", anglemod(180 + sentry_preview_offset)));
+                            SentryPreviewStop();
+                        } else {
+                            print("Can't build here\n");
+                        }
+                    }
+
+                    if (input_buttons & BUTTON0) {
+                        input_buttons = input_buttons - BUTTON0;
+                    }
+                }
+            }
+            break;
+    }
+
+    if (prevent_firing && !previewing_sentry && (keyups & BUTTON0)) {
+        prevent_firing = FALSE;
+    }
+
+    if (prevent_firing) {
+        input_buttons &= ~BUTTON0;
+    }
 
     PM_InputFrame();
     FO_ApplyCussInput();
@@ -722,6 +894,15 @@ void _Sync_ServerCommandFrame() {
 
     CsGrenTimer::UpdateSoundStack();
     UpdateTeamColorCrosshair();
+
+    if (previewing_sentry) {
+        if (game_state.is_alive) {
+            sentry_fits = CheckArea(sentry_preview);
+            sentry_preview.colormod = sentry_fits ? '1 1 1' : '0.5 0.2 0.2';
+        } else {
+            SentryPreviewStop();
+        }
+    }
 }
 
 
@@ -753,7 +934,7 @@ float FoLogin(string token, float print_error) {
     }
 
     if (token == "") {
-       if (print_error)
+        if (print_error)
             print("Token required: Please sign-up at fortressone.org and follow the instructions to generate your login token.\n");
         return FALSE;
     }

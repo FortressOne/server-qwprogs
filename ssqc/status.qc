@@ -757,6 +757,36 @@ string GetSBClassInfo(entity pl, float csqcactive)
     return st1;
 }
 
+void UpdateClientPlayerDie(entity pl) {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
+
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
+    WriteByte(MSG_MULTICAST, MSG_PLAYER_DIE);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS);
+}
+
+void UpdateClientPlayerSpawn(entity pl) {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
+
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
+    WriteByte(MSG_MULTICAST, MSG_PLAYER_SPAWN);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS);
+}
+
+void UpdateClientBuilding(entity pl) {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
+
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
+    WriteByte(MSG_MULTICAST, MSG_BUILDING);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS);
+}
+
 void UpdateClientReloadSound(entity pl, float weapon) {
     if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
         return;

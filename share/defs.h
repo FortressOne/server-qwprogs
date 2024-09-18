@@ -446,9 +446,9 @@ struct Slot { int id; };
 #define TF_SCAN_ENEMY               43  // Scout: Toggle scanning of enemies
 #define TF_SCAN_FRIENDLY            44  // Scout: Toggle scanning of friendlies
 #define TF_SCAN_SOUND               45  // Scout: Toggle scanner sound
-#define TF_ZOOMTOGGLE               46  // Sniper: Toggle zoom mode on/off
-#define TF_ZOOMIN                   47  // Sniper: Zoom in (while zoom mode is on)
-#define TF_ZOOMOUT                  48  // Sniper: Zoom out (while zoom mode is on)
+//				    46
+//				    47
+//				    48
 #define TF_DEMOMAN_DETPACK          49  // Demoman: Bring up detpack menu
 #define TF_DETPACK                  50  // Demoman: Detpack Pre-Impulse
 #define TF_DETPACK_STOP             51  // Demoman: Impulse to stop setting detpack
@@ -678,6 +678,12 @@ struct Slot { int id; };
 #define DARKGREEN  	12
 #define YELLOW 		13
 #define DARKBLUE   	14
+
+#define NOTEAMCOLOR     "0xffffff"
+#define BLUETEAMCOLOR   "0x00aaff"
+#define REDTEAMCOLOR    "0xff3333"
+#define YELLOWTEAMCOLOR "0xffdd00"
+#define GREENTEAMCOLOR  "0x00ff44"
 
 /*======================================================*/
 /* Defines for the ENGINEER's Building ability		*/
@@ -1460,16 +1466,19 @@ enum {
 #define STAT_ALL_TIME           38
 #define STAT_SPAWN_GEN          39
 #define STAT_ROUND_END          40
+#define STAT_HAS_SENTRY         41
 
 // Dimensions
 #define DMN_FLASH 1 // when flashed, we set dimension see to this
 // all bits between 1 and 255 are reserved for flash
 #define DMN_NOFLASH	256	// see all the things
 #define DMN_TEAMBLUE	512
-#define DMN_TEAMRED		1024
+#define DMN_TEAMRED	1024
 #define DMN_TEAMYELL	2048
 #define DMN_TEAMGREN	4096
 #define DMN_INVISIBLE	8192	// special dimension to hide stuff in
+#define DMN_HIDDEN	16384   // put an entity here instead of noflash, then remove DMN_HIDDEN from a player's dimension_see to hide it from that player
+#define DMN_GHOST	32768   // put ghosts in here
 
 // trigger_push
 #define PUSH_ONCE	1
@@ -1600,9 +1609,6 @@ TFAlias client_aliases[] = {
     {"scansound",               TF_SCAN_SOUND},
     {"scanf",                   TF_SCAN_FRIENDLY},
     {"scane",                   TF_SCAN_ENEMY},
-    {"zoomtoggle",              TF_ZOOMTOGGLE},
-    {"zoomin",                  TF_ZOOMIN},
-    {"zoomout",                 TF_ZOOMOUT},
     {"detpipe",                 TF_PB_DETONATE},
     {"+det5",                   TF_DETPACK_5},
     {"-det5",                   TF_DETPACK_STOP},

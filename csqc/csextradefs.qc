@@ -114,7 +114,8 @@ float vote_selected_index;
 float vote_list_offset;
 entity current_vote;
 string vote_list_filter;
-float zoomed_in;
+float oldbuttons;
+float zoom_scale;
 float pick_up_time;
 float flag_team;
 

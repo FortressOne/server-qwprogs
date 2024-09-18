@@ -48,23 +48,16 @@ float remote_client_time();
 .float cheat_check;             // Time when we'll next check for team cheats
 .float is_removed;              // TRUE if the entity has been removed
 .float is_undercover;           // TRUE for a SPY if they're undercover
-.float is_building;             // TRUE for an ENGINEER if they're building something
+.float is_building;             // BUILD_DISPENSER, BUILD_SENTRYGUN or FALSE for an ENGINEER
 .float is_detpacking;           // TRUE for a DEMOMAN if they're setting a detpack
 .float is_button_feigning;      // TRUE for a SPY if they're feigning death with +feign or +special
 .float feign_next_damage;       // TRUE for a SPY if they're going to feign death on next damage
 .float is_unabletospy;          // TRUE for a SPY if they can't go undercover
-.float is_zooming;              // TRUE for a SNIPER if they're currently zoomed in
 .float has_throwngren;          // TRUE for a player that has thrown a grenade (won't get a free suicide)
 .float has_changedteam;         // TRUE for a player that has changed team
 .float has_changedclass;        // TRUE for a player that has changed class
 .float has_disconnected;        // TRUE if the player has disconnected
 .float has_menutimer;           // TRUE if the player has an active menu timer
-.float default_sensitivity;     // Player's default (non-zoomed) sensitivity
-.float default_fov;             // Player's default (non-zoomed) fov
-.float current_fov;             // Player's current field of view
-.float zoom_level;              // Start zooming to this fov next frame
-.float zoom_fov;                // The default fov to zoom in to when pressing special button
-.float zoom_last;               // The last used zoom fov by the player - zoom to this when toggling zoom
 .float has_voted_map;           // Map option that player voted for
 .float spawn_time;              // Time when player spawned
 .float menu_time;               // Time when vote map menu was first issued
@@ -100,8 +93,10 @@ float remote_client_time();
 .float building_percentage;     // The building percentage shown in status bar
 .float fragstreak;              // Frag streak
 .float caps;                    // Caps during this game
+.float needs_skin_update;       // Set true when per-player skins need updating
 
 .entity nopickup;               // Don't pick up this backpack/ammobox because it doesn't contain any of your ammo types
+.entity disguised_as;           // Used when cycling through disguises
 
 .float pstate;                  // Player state flags
 .float tfstate;                 // State flags for TeamFortress
@@ -202,7 +197,7 @@ float coop;
 .entity real_owner;
 .float has_dispenser;           // TRUE for an ENGINEER if he has a dispenser
 .float has_sentry;              // TRUE for an ENGINEER if he has a sentry
-.entity sentry_ent;				// Contains sentry gun entity
+.entity sentry_ent;		// Contains sentry gun entity
 
 .float real_frags;              // Used to store the players frags when TeamFrags is On
 

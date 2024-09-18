@@ -78,6 +78,7 @@ sound files are found in `fortress/sound/hitaudio/` and  `fortress/sound/announc
 * `localinfo fo_matchrated 2` whether match is rated / affects trueskill. 2 is false for 1v1 and 2v2 only.
 * `localinfo backend_address <uri>` to specify backend API endpoint. Default: https://www.fortressone.org/
 * All-time attack and all-time defence team options.
+* `setinfo team<n>color <color>` sets player skins colours for team <n>, where <color> is quake palette 0-15 or hex code beginning with 0x. E.g. `setinfo team1colour 0` makes all team 1 players white, `setinfo team2color 0xFF8800` makes all team 2 players orange. `setinfo team<n>color ""` to restore defaults. Note that `teamcolor` and `enemycolor` cvars will take priority.
 * `setinfo precise_grenades on/off` to enable precise timing when throwing grenades.  This removes a random, up to, 100ms input delay.  (default on)
 * `localinfo forcereload 0/1` Option to prevent forced reloads.
 * `+grenade1` and `+grenade2` grenade buttons (more reliable than impulses), push to prime, again to throw.
@@ -91,6 +92,9 @@ sound files are found in `fortress/sound/hitaudio/` and  `fortress/sound/announc
 * New buttons (not impulses):
 * `+special` Scout: `dash`, Demoman: `detpipe`, Medic: `aura`, Hwguy: `lock`, Pyro: `airblast`, Spy: `+feign`, Engineer: `toggledispenser`.
 * `+special2` Same as `special2`, but also has `+rj` for Soldier and Pyro.
+* `specialup` Engineer: `cmd sentry rotate -15`, Spy: `cmd disguise prev`.
+* `specialdown` Engineer: `cmd sentry rotate 15`, Spy: `cmd disguise next`.
+* `zoomin` and `zoomout` commands that adjust sens with zoom. 5 levels.
 * `setinfo hold_grens` for press and hold `+grenade1` and `+grenade2`
 * `setinfo hold_fiegn` for press and hold feigning
 * `setinfo hold_detpack` for press and hold detpack
