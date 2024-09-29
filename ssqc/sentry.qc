@@ -374,13 +374,14 @@ void () Sentry_Explode = {
 void () Sentry_Die = {
     sprint(self.real_owner, PRINT_HIGH, "Your sentry gun was destroyed\n");
     stuffcmd(self.real_owner, "play misc/chink.wav\n");
-    self.real_owner.has_sentry = 0;
-    
+    local entity ro = self.real_owner;
+    ro.has_sentry = 0;
+
     self.tfstate = self.tfstate | TFSTATE_RESPAWN_READY;
     self.think = Sentry_Explode;
     self.nextthink = time + 0.1;
-    if (self.real_owner.is_building) {
-        self = self.real_owner;
+    if (ro.is_building) {
+        self = ro;
         TeamFortress_EngineerBuildStop();
     }
 };

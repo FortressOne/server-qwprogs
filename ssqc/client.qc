@@ -2101,19 +2101,19 @@ void (float all_dimensions) SetDimensions = {
         switch (self.team_no)
         {
             case TEAM_BLUE:
-                self.dimension_see = DMN_NOFLASH | DMN_TEAMBLUE;
+                self.dimension_see = DMN_NOFLASH | DMN_HIDDEN | DMN_TEAMBLUE;
                 break;
             case TEAM_RED:
-                self.dimension_see = DMN_NOFLASH | DMN_TEAMRED;
+                self.dimension_see = DMN_NOFLASH | DMN_HIDDEN | DMN_TEAMRED;
                 break;
             case TEAM_YELL:
-                self.dimension_see = DMN_NOFLASH | DMN_TEAMYELL;
+                self.dimension_see = DMN_NOFLASH | DMN_HIDDEN | DMN_TEAMYELL;
                 break;
             case TEAM_GREN:
-                self.dimension_see = DMN_NOFLASH | DMN_TEAMGREN;
+                self.dimension_see = DMN_NOFLASH | DMN_HIDDEN | DMN_TEAMGREN;
                 break;
             default:
-                self.dimension_see = DMN_NOFLASH;
+                self.dimension_see = DMN_NOFLASH | DMN_HIDDEN;
                 break;
         }
     }

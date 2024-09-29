@@ -1460,16 +1460,19 @@ enum {
 #define STAT_ALL_TIME           38
 #define STAT_SPAWN_GEN          39
 #define STAT_ROUND_END          40
+#define STAT_HAS_SENTRY         41
 
 // Dimensions
 #define DMN_FLASH 1 // when flashed, we set dimension see to this
 // all bits between 1 and 255 are reserved for flash
 #define DMN_NOFLASH	256	// see all the things
 #define DMN_TEAMBLUE	512
-#define DMN_TEAMRED		1024
+#define DMN_TEAMRED	1024
 #define DMN_TEAMYELL	2048
 #define DMN_TEAMGREN	4096
 #define DMN_INVISIBLE	8192	// special dimension to hide stuff in
+#define DMN_HIDDEN	16384   // put an entity here instead of noflash, then remove DMN_HIDDEN from a player's dimension_see to hide it from that player
+#define DMN_GHOST	32768   // put ghosts in here
 
 // trigger_push
 #define PUSH_ONCE	1

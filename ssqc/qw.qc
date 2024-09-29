@@ -48,7 +48,7 @@ float remote_client_time();
 .float cheat_check;             // Time when we'll next check for team cheats
 .float is_removed;              // TRUE if the entity has been removed
 .float is_undercover;           // TRUE for a SPY if they're undercover
-.float is_building;             // TRUE for an ENGINEER if they're building something
+.float is_building;             // BUILD_DISPENSER, BUILD_SENTRYGUN or FALSE for an ENGINEER
 .float is_detpacking;           // TRUE for a DEMOMAN if they're setting a detpack
 .float is_button_feigning;      // TRUE for a SPY if they're feigning death with +feign or +special
 .float feign_next_damage;       // TRUE for a SPY if they're going to feign death on next damage
@@ -202,7 +202,7 @@ float coop;
 .entity real_owner;
 .float has_dispenser;           // TRUE for an ENGINEER if he has a dispenser
 .float has_sentry;              // TRUE for an ENGINEER if he has a sentry
-.entity sentry_ent;				// Contains sentry gun entity
+.entity sentry_ent;		// Contains sentry gun entity
 
 .float real_frags;              // Used to store the players frags when TeamFrags is On
 

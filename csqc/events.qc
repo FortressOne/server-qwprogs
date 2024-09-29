@@ -359,6 +359,9 @@ void() CSQC_Parse_Event = {
             flag_team = readfloat();
             pick_up_time = time;
             break;
+        case MSG_BUILDING:
+            SentryPreviewStop();
+            break;
         case MSG_FLAG_DROP:
             pick_up_time = FALSE;
             break;
