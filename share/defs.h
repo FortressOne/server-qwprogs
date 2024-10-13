@@ -679,6 +679,12 @@ struct Slot { int id; };
 #define YELLOW 		13
 #define DARKBLUE   	14
 
+#define NOTEAMCOLOR     "0xffffff"
+#define BLUETEAMCOLOR   "0x00aaff"
+#define REDTEAMCOLOR    "0xff3333"
+#define YELLOWTEAMCOLOR "0xffdd00"
+#define GREENTEAMCOLOR  "0x00ff44"
+
 /*======================================================*/
 /* Defines for the ENGINEER's Building ability		*/
 /*======================================================*/

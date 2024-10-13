@@ -25,7 +25,7 @@ void () lvl2_sentry_stand;
 void () lvl3_sentry_stand;
 
 float (float tno) TeamFortress_TeamSet;
-float (float tno) TeamFortress_TeamGetColor;
+string (float tno) TeamFortress_TeamGetColor;
 float () TeamFortress_TeamPutPlayerInTeam;
 float (float tno) TeamFortress_TeamIsCivilian;
 float (float tno) TeamFortress_TeamGetNoPlayers;

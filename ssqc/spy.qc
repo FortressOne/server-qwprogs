@@ -495,19 +495,16 @@ void (entity player, float is_user) FO_Spy_DisguiseLastSpawned = {
     }
 };
 
-
 void (entity own) Spy_SetClientSkins = {
     entity te;
-    string color, dcolor, skin, dskin, sendcolor, sendskin, pteam, dsteam, sendteam;
+    string skin, dskin, sendcolor, sendskin, pteam, dsteam, sendteam;
     float dteam, dpc;
 
     dteam = own.undercover_team == 0 ? own.team_no : own.undercover_team;
     dpc = own.undercover_skin == 0 ? own.playerclass : own.undercover_skin;
-    color = ftos(TeamFortress_TeamGetColor(own.team_no) - 1);
-    dcolor = ftos(TeamFortress_TeamGetColor(dteam) - 1);
 
-    skin = TeamFortress_GetSkin(own.team_no, own.playerclass);
-    dskin = TeamFortress_GetSkin(dteam, dpc);
+    skin = TeamFortress_GetSkin(own.playerclass);
+    dskin = TeamFortress_GetSkin(dpc);
 
     pteam = GetTeamName(own.team_no);
     dsteam = GetTeamName(dteam);
@@ -520,13 +517,13 @@ void (entity own) Spy_SetClientSkins = {
             if (te.team_no == own.team_no)
             {
                 // on same team, send them spy/team (initial spawn etc)
-                sendcolor = color;
+                sendcolor = TeamFortress_TeamGetColorFor(te, own.team_no);
                 sendskin = skin;
                 sendteam = pteam;
             }
             else // not on same team, send them disguise
             {
-                sendcolor = dcolor;
+                sendcolor = TeamFortress_TeamGetColorFor(te, dteam);
                 sendskin = dskin;
                 sendteam = dsteam;
             }
@@ -701,7 +698,6 @@ void (entity pe_player, float pf_class, float is_user) CF_Spy_ChangeSkin = {
 
 void (entity pe_player, float pf_team_no, float is_user) CF_Spy_ChangeColor = {
     local entity e_timer;
-    local float f_team_color = TeamFortress_TeamGetColor(pf_team_no) - 1;
 
     // stop if you're already disguised as the requested skin
     if (pe_player.undercover_team == pf_team_no)
@@ -1211,8 +1207,9 @@ void (entity spy) Spy_RemoveDisguise = {
         timer = find(timer, classname, "spytimer");
     }
 
-    if (coverblown)
+    if (coverblown) {
         Status_Print(self, "\n\n\n\n\n\n\n", "You blew your cover!");
+    }
 
     local float autodisguise = FO_GetUserSetting(self, "autodisguise", "ad", "off");
     if (self.playerclass == PC_SPY) {

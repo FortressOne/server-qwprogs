@@ -9,7 +9,7 @@ float (float tno) TeamFortress_TeamGetLives;
 float (float tno) TeamFortress_TeamGetMaxPlayers;
 string(float tno) TeamFortress_TeamGetColorString;
 float (float tno) TeamFortress_TeamGetIllegalClasses;
-string(float tn, float pc) TeamFortress_GetSkin;
+string(float pc) TeamFortress_GetSkin;
 
 float () TeamFortress_TeamPutPlayerInTeam =
 {
@@ -39,17 +39,62 @@ float () TeamFortress_TeamPutPlayerInTeam =
     return (TeamFortress_TeamSet(likely_team));
 };
 
-float (float tno) TeamFortress_TeamGetColor = {
-    if (tno == 1)
-        return (DARKBLUE);
-    if (tno == 2)
-        return (RED);
-    if (tno == 3)
-        return (YELLOW);
-    if (tno == 4)
-        return (DARKGREEN);
-    return (1);
+string (float tno) TeamFortress_TeamGetColor = {
+    local string color = NOTEAMCOLOR;
+
+    switch (tno) {
+        case 1:
+            color = BLUETEAMCOLOR;
+            break;
+        case 2:
+            color = REDTEAMCOLOR;
+            break;
+        case 3:
+            color = YELLOWTEAMCOLOR;
+            break;
+        case 4:
+            color = GREENTEAMCOLOR;
+            break;
+    }
+
+    return color;
 };
+
+string TeamFortress_TeamGetColorFor(entity pov, float tno) {
+    local string color = NOTEAMCOLOR;
+
+    if (pov.team_no == tno && cvar("teamcolor")) {
+        color = cvar_string("teamcolor");
+    } else if (pov.team_no != tno && cvar("enemycolor")) {
+        color = cvar_string("enemycolor");
+    } else {
+        switch (tno) {
+            case 1:
+                color = infokey(pov, "team1color");
+                if (color == "" || color == "off")
+                    color = BLUETEAMCOLOR;
+                break;
+            case 2:
+                color = infokey(pov, "team2color");
+                if (color == "" || color == "off")
+                    color = REDTEAMCOLOR;
+                break;
+            case 3:
+                color = infokey(pov, "team3color");
+                if (color == "" || color == "off")
+                    color = YELLOWTEAMCOLOR;
+                break;
+            case 4:
+                color = infokey(pov, "team4color");
+                if (color == "" || color == "off")
+                    color = GREENTEAMCOLOR;
+                break;
+        }
+    }
+
+    return color;
+}
+
 
 void (float tno) TeamFortress_TeamSetColor = {
     if (tno == 1) {
@@ -156,7 +201,6 @@ float (float tno) CF_TeamIsValid = {
 
 float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options = {
     local string st;
-    local float tc;
     local string team;
 
     if ((intermission_running != 0) || (intermission_exittime > time))
@@ -205,8 +249,7 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
     bprint(PRINT_HIGH, pe.netname, " has joined the ");
     bprint(PRINT_HIGH, team, "\n");
     stuffcmd(pe, "color ");
-    tc = TeamFortress_TeamGetColor(tno) - 1;
-    st = ftos(tc);
+    st = TeamFortress_TeamGetColor(tno);
     stuffcmd(pe, st);
     stuffcmd(pe, "\n");
 
@@ -276,63 +319,51 @@ float (float tno) TeamFortress_TeamSet = {
     return (tftso);
 }
 
-void () TeamFortress_CheckTeamCheats = {
+void (entity player) TeamFortress_CheckTeamCheats = {
     local string st;
     local string sk;
-    local float tc;
 
-    if (self.immune_to_check > time)
+    if (player.immune_to_check > time)
         return;
-    if (self.deadflag)
+    if (player.deadflag)
         return;
 
-    if (self.netname == string_null) {
-        KickCheater(self);
+    if (player.netname == string_null) {
+        KickCheater(player);
     } else {
-        if (((self.playerclass != 0) && (self.team_no == 0)) &&
+        if (((player.playerclass != 0) && (player.team_no == 0)) &&
             (teamplay > 0)) {
-            KickCheater(self);
+            KickCheater(player);
         }
     }
-    if ((self.team_no > 0) && (teamplay > 0)) {
-        st = infokey(self, "bottomcolor");
-        tc = stof(st);
-        if (tc != (TeamFortress_TeamGetColor(self.team_no) - 1)) {
-            stuffcmd(self, "color ");
-            tc = TeamFortress_TeamGetColor(self.team_no) - 1;
-            st = ftos(tc);
-            stuffcmd(self, st);
-            stuffcmd(self, "\n");
-            /*bprint2(PRINT_MEDIUM, self.netname,
-                    " has been kicked for changing color\n");
-            sprint(self, PRINT_HIGH,
-                    "You have been kicked for changing your pants color\n");
-            KickCheater(self);*/
-            return;
+    if ((player.team_no > 0) && (teamplay > 0)) {
+        st = infokey(player, "bottomcolor");
+        if (st != TeamFortress_TeamGetColor(player.team_no)) {
+            bprint(PRINT_HIGH, sprintf("%s's bottomcolor is wrong\n", player.netname));
+            bprint(PRINT_HIGH, sprintf("setinfo: %s\n", st));
+            bprint(PRINT_HIGH, sprintf("TF_TGC: %s\n", TeamFortress_TeamGetColor(player.team_no)));
+            TeamFortress_SetSkin(player);
         }
-        if (self.playerclass != 0) {
-            st = infokey(self, "skin");
-            tc = 0;
-            sk = TeamFortress_GetSkin(self.team_no, self.playerclass);
+        if (player.playerclass != 0) {
+            st = infokey(player, "skin");
+            sk = TeamFortress_GetSkin(player.playerclass);
             if (st != sk) {
-                TeamFortress_SetSkin(self);
-                bprint(PRINT_MEDIUM, self.netname,
+                TeamFortress_SetSkin(player);
+                bprint(PRINT_MEDIUM, player.netname,
                         " has been kicked for changing skin\n");
-                sprint(self, PRINT_HIGH,
+                sprint(player, PRINT_HIGH,
                        "You have been kicked for changing your skin\n");
-                KickCheater(self);
+                KickCheater(player);
             }
-            if (tc == 8)
-                self.playerclass = 8;
         }
-        st = GetTeamName(self.team_no);
-        if (st != infokey(self, "team")) {
-            SetTeamName(self);
-            bprint(PRINT_MEDIUM, self.netname,
+        st = GetTeamName(player.team_no);
+        if (st != infokey(player, "team")) {
+            SetTeamName(player);
+            bprint(PRINT_MEDIUM, player.netname,
                     " has been kicked for changing team\n");
-            sprint(self, PRINT_HIGH,
+            sprint(player, PRINT_HIGH,
                    "You have been kicked for changing your team\n");
-            KickCheater(self);
+            KickCheater(player);
             return;
         }
     }
@@ -579,7 +610,7 @@ void (float all) TeamFortress_TeamShowScores = {
     i = 1;
     if (all == 2) {
         while (i <= number_of_teams) {
-            if (TeamFortress_TeamGetColor(i) > 0) {
+            if (TeamFortress_TeamGetColor(i) != NOTEAMCOLOR) {
                 j = TeamFortress_TeamGetScore(i);
                 st = TeamFortress_TeamGetColorString(i);
                 bprint(PRINT_HIGH, st, ": ");
@@ -592,7 +623,7 @@ void (float all) TeamFortress_TeamShowScores = {
         return;
     }
     while (i <= number_of_teams) {
-        if (TeamFortress_TeamGetColor(i) > 0) {
+        if (TeamFortress_TeamGetColor(i) != NOTEAMCOLOR) {
             if (all) {
                 bprint(PRINT_HIGH, "Team ");
             } else {
@@ -637,38 +668,25 @@ void (float all) TeamFortress_TeamShowScores = {
     }
 };
 
-string(float tno) TeamFortress_TeamGetColorString =
-{
-    local float col;
+string(float tno) TeamFortress_TeamGetColorString = {
+    local string colour = "White";
 
-    col = TeamFortress_TeamGetColor(tno);
-    if (col == WHITE)
-        return ("White");
-    if (col == BROWN)
-        return ("Brown");
-    if (col == BLUE)
-        return ("Blue");
-    if (col == GREEN)
-        return ("Green");
-    if (col == RED)
-        return ("Red");
-    if (col == TAN)
-        return ("Tan");
-    if (col == PINK)
-        return ("Pink");
-    if (col == ORANGE)
-        return ("Orange");
-    if (col == PURPLE)
-        return ("Purple");
-    if (col == DARKPURPLE)
-        return ("DarkPurple");
-    if (col == GREY)
-        return ("Grey");
-    if (col == DARKGREEN)
-        return ("DarkGreen");
-    if (col == YELLOW)
-        return ("Yellow");
-    return ("Blue");
+    switch(tno) {
+        case 1:
+            colour = "Blue";
+            break;
+        case 2:
+            colour = "Red";
+            break;
+        case 3:
+            colour = "Yellow";
+            break;
+        case 4:
+            colour = "Green";
+            break;
+    }
+
+    return colour;
 };
 
 void (entity Player) TeamFortress_TeamShowMemberClasses = {

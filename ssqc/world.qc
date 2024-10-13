@@ -86,6 +86,8 @@ void WorldSpawnPost()
 }
 
 void () worldspawn = {
+    whichpack("textures/skins/fo_scout.png", 1); // ensures that fo_skins.pk3 is sent
+
     // Set this variable on connect so the client knows it has access to
     // FortressOne aliases.
     WriteByte(MSG_INIT, 9/*svc_stufftext*/);

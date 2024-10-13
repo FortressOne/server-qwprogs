@@ -100,6 +100,7 @@ float remote_client_time();
 .float building_percentage;     // The building percentage shown in status bar
 .float fragstreak;              // Frag streak
 .float caps;                    // Caps during this game
+.float needs_skin_update;       // Set true when per-player skins need updating
 
 .entity nopickup;               // Don't pick up this backpack/ammobox because it doesn't contain any of your ammo types
 

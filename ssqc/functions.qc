@@ -1,5 +1,6 @@
 float (float tno) TeamFortress_TeamSet;
-float (float tno) TeamFortress_TeamGetColor;
+string (float tno) TeamFortress_TeamGetColor;
+string (entity pov, float tno) TeamFortress_TeamGetColorFor;
 void (entity p) SetTeamName;
 void (entity pl) Menu_Close;
 
@@ -8,7 +9,7 @@ void (float tno) playerSetTeam = {
 	TeamFortress_TeamSet(tno);
 	self.team_no = tno;
 	stuffcmd(self, "color ");
-	st = ftos(TeamFortress_TeamGetColor (tno) - 1);
+	st = TeamFortress_TeamGetColor(tno);
 	stuffcmd(self, st);
 	stuffcmd(self, "\n");
 	SetTeamName(self);

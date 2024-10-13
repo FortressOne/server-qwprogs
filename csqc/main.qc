@@ -621,6 +621,7 @@ static void UpdateTeamColorCrosshair() {
             break;
         case 4:
             crosshair_color = "0x00ff00";
+            break;
     }
     localcmd("crosshaircolor ", crosshair_color, "\n");
     crosshair_team_no = team_no;
