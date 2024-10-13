@@ -928,8 +928,8 @@ static void ParseCvars() {
 
 #define MUX_IN(ef, bit, src) \
     do { if ((ef) & (bit)) { rad = max(rad, src.i); col += src.v; } } while (0)
-static void LocalEffects() {
-    float effects = pstate_server.effects;
+
+void LocalEffects(float effects, vector org) {
     float rad = 0;
     vector col = '0 0 0';
 
@@ -946,7 +946,7 @@ static void LocalEffects() {
     MUX_IN(effects, EF_BLUE, bluelight_l);
 
     rad = min(rad, 400);
-    dynamiclight_add(pm.vieworg, rad, col);
+    dynamiclight_add(org, rad, col, 0, "", 0);
 }
 #undef MUX_IN
 
@@ -958,7 +958,7 @@ void PM_UpdateView() {
     makevectors(view_angles);
     SetListener(pm.vieworg, v_forward, v_right, v_up);
 
-    LocalEffects();
+    LocalEffects(pstate_server.effects, pm.vieworg);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

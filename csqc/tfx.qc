@@ -252,13 +252,20 @@ static void UpdateFlagOutline(entity flag) {
 }
 
 float UpdateFlag(float isnew) {
-    if (isnew) {
-        float mindex = self.modelindex;
-        AddOutline(self);
-        // Flags have their own shader already, just make them shiny for now.
-    }
+    /* if (isnew) { */
+    /*     float mindex = self.modelindex; */
+    /*     AddOutline(self); */
+    /*     // Flags have their own shader already, just make them shiny for now. */
+    /* } */
 
-    UpdateFlagOutline(self);
+    /* UpdateFlagOutline(self); */
+
+    LocalEffects(self.effects, self.origin);
+
+    if (self.skin == team_no) {
+        local float distance = vlen(self.origin - PM_Org());
+        self.alpha = min(0.25 + (distance / 200), 1);
+    }
 
     return TRUE;
 }
@@ -309,4 +316,8 @@ void TF_Init() {
 
     shader_over_outline = shaderforname(rnds("over_outline"), "{ sort 7 }");
 #endif
+
+    deltalisten("progs/ff_flag.mdl", UpdateFlag, 0);
+    deltalisten("progs/tf_flag.mdl", UpdateFlag, 0);
+    deltalisten("progs/tf_stan.mdl", UpdateFlag, 0);
 }
