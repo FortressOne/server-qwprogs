@@ -194,6 +194,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     precache_model("progs/turrpreview.mdl");
     sentry_preview = spawn();
     setmodel(sentry_preview, "progs/turrpreview.mdl");
+    setsize(sentry_preview, '-16 -16 0', '16 16 48');
     sentry_preview.alpha = 0.25;
 
     precache_model("progs/sphere.mdl");
@@ -223,6 +224,40 @@ void PMD_DrawGraphs(float width);
 
 DEFCVAR_FLOAT(fov, 90);
 
+void SentryPreviewStart() {
+    sentry_preview_offset = 0;
+    sentry_preview.angles_y = input_angles_y;
+    sentry_preview.drawmask = MASK_ENGINE;
+
+    local vector sphere_colormod = '1 1 1';
+    switch (team_no) {
+        case 1:
+            sphere_colormod = '0 0.4 1';
+            break;
+        case 2:
+            sphere_colormod = '1 0 0';
+            break;
+        case 3:
+            sphere_colormod = '1 1 0';
+            break;
+        case 4:
+            sphere_colormod = '0 1 0';
+            break;
+    }
+
+    sentry_preview_range_sphere.colormod = sphere_colormod * 4;
+    sentry_preview_range_sphere.drawmask = MASK_ENGINE;
+
+    previewing_sentry = TRUE;
+    prevent_firing = TRUE;
+}
+
+void SentryPreviewStop() {
+    previewing_sentry = FALSE;
+    sentry_preview.drawmask = 0;
+    sentry_preview_range_sphere.drawmask = 0;
+}
+
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
     float fts = perf_start_sample(&frame_timing);
     clearscene();
@@ -246,6 +281,16 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
         PM_UpdateView();
 
     if (previewing_sentry) {
+        if (game_state.is_alive) {
+        } else {
+        }
+    }
+
+    if (previewing_sentry) {
+        if (!game_state.is_alive) {
+            SentryPreviewStop();
+        } else {
+        }
         makevectors(view_angles);
         local vector v_forward_sentry;
         v_forward_sentry.z = (normalize(v_forward) * 64).z;
@@ -255,6 +300,8 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
         v_forward_sentry.y = xy_pos.y;
 
         sentry_preview.origin = PM_Org() + v_forward_sentry;
+        sentry_fits = PlaceSentry(sentry_preview, PM_Org());
+        sentry_preview.colormod = sentry_fits ? '1 1 1' : '0.5 0.2 0.2';
         sentry_preview_range_sphere.origin = sentry_preview.origin;
         sentry_preview.angles_y = anglemod(view_angles_y + sentry_preview_offset);
     } else {
@@ -734,40 +781,6 @@ void FO_ApplyCussInput() {
 
 void PM_InputFrame();
 
-void SentryPreviewStart() {
-    sentry_preview_offset = 0;
-    sentry_preview.angles_y = input_angles_y;
-    sentry_preview.drawmask = MASK_ENGINE;
-
-    local vector sphere_colormod = '1 1 1';
-    switch (team_no) {
-        case 1:
-            sphere_colormod = '0 0.4 1';
-            break;
-        case 2:
-            sphere_colormod = '1 0 0';
-            break;
-        case 3:
-            sphere_colormod = '1 1 0';
-            break;
-        case 4:
-            sphere_colormod = '0 1 0';
-            break;
-    }
-
-    sentry_preview_range_sphere.colormod = sphere_colormod * 4;
-    sentry_preview_range_sphere.drawmask = MASK_ENGINE;
-
-    previewing_sentry = TRUE;
-    prevent_firing = TRUE;
-}
-
-void SentryPreviewStop() {
-    previewing_sentry = FALSE;
-    sentry_preview.drawmask = 0;
-    sentry_preview_range_sphere.drawmask = 0;
-}
-
 noref void CSQC_Input_Frame() {
     local float changed_buttons = input_buttons ^ oldbuttons;
     oldbuttons = input_buttons;
@@ -894,15 +907,6 @@ void _Sync_ServerCommandFrame() {
 
     CsGrenTimer::UpdateSoundStack();
     UpdateTeamColorCrosshair();
-
-    if (previewing_sentry) {
-        if (game_state.is_alive) {
-            sentry_fits = CheckArea(sentry_preview, player_localentnum);
-            sentry_preview.colormod = sentry_fits ? '1 1 1' : '0.5 0.2 0.2';
-        } else {
-            SentryPreviewStop();
-        }
-    }
 }
 
 

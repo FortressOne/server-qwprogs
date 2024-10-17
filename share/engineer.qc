@@ -1,59 +1,22 @@
-float (entity obj, float builder) CheckArea = {
-    local vector src;
-    local vector end;
-    local float pos;
-    local entity te;
+float PlaceSentry(entity sentry, vector builder_org) {
+    tracebox(sentry.origin, sentry.mins, sentry.maxs, sentry.origin, MOVE_NORMAL, sentry);
 
-    pos = pointcontents(obj.origin);
-    if ((pos == CONTENT_SOLID) || (pos == CONTENT_SKY)) {
-        return (0);
-    }
-    src_x = (obj.origin_x) + 24;
-    src_y = (obj.origin_y) + 24;
-    src_z = (obj.origin_z);
-    pos = pointcontents(src);
-    if ((pos == CONTENT_SOLID) || (pos == CONTENT_SKY)) {
-        return (0);
-    }
-    end_x = (obj.origin_x) - 16;
-    end_y = (obj.origin_y) - 16;
-    end_z = (obj.origin_z);
-    traceline(src, end, 1, obj);
-    if (trace_fraction != 1) {
-        return (0);
-    }
-    pos = pointcontents(end);
-    if ((pos == CONTENT_SOLID) || (pos == CONTENT_SKY)) {
-        return (0);
-    }
-    src_x = (obj.origin_x) - 16;
-    src_y = (obj.origin_y) + 16;
-    src_z = (obj.origin_z);
-    pos = pointcontents(src);
-    if ((pos == CONTENT_SOLID) || (pos == CONTENT_SKY)) {
-        return (0);
-    }
-    end_x = (obj.origin_x) + 16;
-    end_y = (obj.origin_y) - 16;
-    end_z = (obj.origin_z);
-    traceline(src, end, 1, obj);
-    if (trace_fraction != 1) {
-        return (0);
-    }
-    pos = pointcontents(end);
-    if ((pos == CONTENT_SOLID) || (pos == CONTENT_SKY)) {
-        return (0);
-    }
-    /* traceline(builder.origin, obj.origin, 1, builder); */
-    /* if (trace_fraction != 1) { */
-    /*     return (0); */
-    /* } */
+    if (trace_inopen)
+        return (1);
 
-    te = findradius(obj.origin, 64);
-    if (te != world) {
-        if !(te.movetype == MOVETYPE_WALK && builder && num_for_edict(te.owner) == builder) {
-            return (0);
+    local vector start = sentry.origin;
+    start_z = builder_org_z + 64;
+
+    tracebox(start, sentry.mins, sentry.maxs, sentry.origin, MOVE_NORMAL, sentry);
+
+    if (trace_fraction < 1.0) {
+        tracebox(trace_endpos, sentry.mins, sentry.maxs, trace_endpos, MOVE_NORMAL, sentry);
+
+        if (trace_inopen) {
+            sentry.origin = trace_endpos;
+            return (1);
         }
     }
-    return (1);
-};
+
+    return (0);
+}
