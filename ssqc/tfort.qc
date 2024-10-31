@@ -614,6 +614,7 @@ void () TeamFortress_ShowTF = {
     CF_PrintSetting("Old grenades", old_grens, "", 1);
     CF_PrintSetting("Drop grenades on ground", drop_grenades, "", 1);
     CF_PrintSetting("Drop grenades in pack", drop_grenpack, "", 1);
+
     if (drop_grenpack) {
         CF_PrintSetting("- Grenades type 1", drop_gren1, "", 0);
         CF_PrintSetting("- Grenades type 2", drop_gren2, "", 0);

@@ -289,8 +289,6 @@ static float NB_UseMinPing() {
 void ActivateOrgGame() {
     disable_resup_gren = 2;  // No gren2 pickups
 
-    drop_gren1 = 0;  // No grenades in backpacks
-
     int i;
     for (i = 1; i <= 9; i++) // 3 gren spawn
         SetAllRoles(i, 1, 3);
@@ -566,7 +564,7 @@ void () DecodeLevelParms = {
         pipecooldown_time = CF_GetSetting("pcdt", "pipecooldown_time", "0.5");
 
         // cooldown applies to all pipes [on]
-        allpipes_cooldown = CF_GetSetting("apcd", "allpipes_cooldown", "on");
+        allpipes_cooldown = CF_GetSetting("apcd", "allpipes_cooldown", "off");
 
         // allow medic aura [on]
         medicaura = CF_GetSetting("ma", "medicaura", "on");
