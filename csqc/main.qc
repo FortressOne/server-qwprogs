@@ -225,7 +225,12 @@ void PMD_DrawGraphs(float width);
 DEFCVAR_FLOAT(fov, 90);
 
 void SentryPreviewStart() {
-    sentry_preview_offset = 0;
+    if (CVARF(fo_forward_facing_sentry)) {
+        sentry_preview_offset = 0;
+    } else {
+        sentry_preview_offset = 180;
+    }
+
     sentry_preview.angles_y = input_angles_y;
     sentry_preview.drawmask = MASK_ENGINE;
 

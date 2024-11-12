@@ -867,6 +867,7 @@ struct {
 DEFCVAR_FLOAT(fo_fte_hud, 0);
 DEFCVAR_FLOAT(fo_legacy_sbar, 0);
 DEFCVAR_FLOAT(fo_csjumpsounds, 1);
+DEFCVAR_FLOAT(fo_forward_facing_sentry, 0);
 
 struct GameState {
     float localentnum;
