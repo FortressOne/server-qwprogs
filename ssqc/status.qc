@@ -787,6 +787,18 @@ void UpdateClientBuilding(entity pl) {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS);
 }
 
+void UpdateClient_Sentry(entity pl, entity sent) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_SENTRY_POS);
+    WriteFloat(MSG_MULTICAST, sent.origin.x);
+    WriteFloat(MSG_MULTICAST, sent.origin.y);
+    WriteFloat(MSG_MULTICAST, sent.origin.z);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
 void UpdateClientReloadSound(entity pl, float weapon) {
     if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
         return;

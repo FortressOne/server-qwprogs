@@ -782,6 +782,24 @@ float (string arg1, string arg2, string arg3, string arg4) ParseCmds = {
                     }
                     ent.nextthink = time + 0.5;
                     break;
+                } else if (arg2 == "angle") {
+                    farg3 = stof(arg3);
+                    if (!ent.real_owner.has_sentry || ent.real_owner != self
+                                || self.classname != "player" || ent == world) {
+                        sprint(self, PRINT_HIGH, "Sentry detection issue!\n");
+                        break;
+                    }
+                    ent.angles_y = farg3;
+                    ent.waitmin = rint(ent.angles_y - 50);
+                    ent.waitmin = anglemod(ent.waitmin);
+                    ent.waitmax = rint(ent.angles_y + 50);
+                    ent.waitmax = anglemod(ent.waitmax);
+                    if (ent.waitmin > ent.waitmax) {
+                        ent.waitmin = ent.waitmax;
+                        ent.waitmax = anglemod(ent.angles_y - 50);
+                    }
+                    ent.nextthink = time + 0.5;
+                    break;
                 }
                 sprint(self, PRINT_HIGH, "Invalid choice.\n");
             } else {

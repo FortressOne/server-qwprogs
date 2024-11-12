@@ -3,6 +3,8 @@
 .float teamno;
 static entity local_player;
 static float shader_team[2], shader_flag, shader_over_outline;
+float update_sentry_angles;
+float sentry_angles_y;
 
 enum {
     TeamNone = 0,
@@ -270,6 +272,36 @@ float UpdateFlag(float isnew) {
     return TRUE;
 }
 
+float UpdateSentry(float isnew) {
+    if (isnew) {
+        sentry_angles_y = self.angles_y;
+    } else {
+        if (update_sentry_angles > time) {
+            self.angles_y = sentry_angles_y;
+        } else {
+            sentry_angles_y = self.angles_y;
+        }
+    }
+
+    return TRUE;
+}
+
+float UpdateSentryBase(float isnew) {
+    if (isnew) {
+        sentry_angles_y = self.angles_y;
+    } else {
+        if (!SBAR.SentryLevel && SBAR.IsBuilding) {
+            if (update_sentry_angles > time) {
+                self.angles_y = sentry_angles_y;
+            } else {
+                sentry_angles_y = self.angles_y;
+            }
+        }
+    }
+
+    return TRUE;
+}
+
 void TFxGrenTimerUpdate(float ent_num, float expiry) {
     EntHash* he = EntGet(ent_num);
     he->grentimer_expires = expiry;
@@ -316,8 +348,9 @@ void TF_Init() {
 
     shader_over_outline = shaderforname(rnds("over_outline"), "{ sort 7 }");
 #endif
-
     deltalisten("progs/ff_flag.mdl", UpdateFlag, 0);
     deltalisten("progs/tf_flag.mdl", UpdateFlag, 0);
     deltalisten("progs/tf_stan.mdl", UpdateFlag, 0);
+    deltalisten("progs/turrgun.mdl", UpdateSentry, 0);
+    deltalisten("progs/turrbase.mdl", UpdateSentryBase, 0);
 }
