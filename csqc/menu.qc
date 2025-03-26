@@ -328,6 +328,7 @@ var fo_menu FO_MENU_SENTRY_MAINTAIN = {
         {"2","180 Degrees","","",FO_MENU_STATE_NORMAL,{localcmd("cmd sentry rotate 180\n");Menu_Cancel();},MENU_BUTTON},
         {"3","Clockwise","","",FO_MENU_STATE_NORMAL,{localcmd("cmd sentry rotate -45\n");Menu_Cancel();},MENU_BUTTON},
         MenuSpacer,
+        /* {"4","With Mouse","","",FO_MENU_STATE_NORMAL,{localcmd("cmd sentry rotate mouse\n");Menu_Cancel();},MENU_BUTTON}, */
         {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
     }, 5, TRUE, {
         if(vlen(PM_Org() - sentry_pos) > ENG_BUILDING_MAINT_DISTANCE) {
@@ -343,6 +344,7 @@ var fo_menu FO_MENU_SENTRY_ROTATE = {
         {"2","180 Degrees","","",FO_MENU_STATE_NORMAL,{localcmd("cmd sentry rotate 180\n");Menu_Cancel();},MENU_BUTTON},
         {"3","Clockwise","","",FO_MENU_STATE_NORMAL,{localcmd("cmd sentry rotate -45\n");Menu_Cancel();},MENU_BUTTON},
         MenuSpacer,
+        /* {"4","With Mouse","","",FO_MENU_STATE_NORMAL,{localcmd("cmd sentry rotate mouse\n");Menu_Cancel();},MENU_BUTTON}, */
         {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
     }, 5, TRUE, {
         if(vlen(PM_Org() - sentry_pos) > ENG_BUILDING_MAINT_DISTANCE) {

@@ -96,7 +96,7 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                             }
                             return TRUE;
                         }
-                }     
+                }
              case IE_KEYUP:
                 switch (scanx) {
                     case K_ESCAPE:
@@ -117,7 +117,6 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                         return TRUE;
                 }
                 break;
-            default:
         }
     }
 

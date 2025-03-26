@@ -24,6 +24,7 @@ time.qc
 ../share/classes.qc
 ../share/animate.qc
 ../share/mcp_precache.qc
+../share/engineer.qc
 helpers.qc
 events.qc
 roles.qc

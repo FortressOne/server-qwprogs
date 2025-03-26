@@ -21,6 +21,7 @@ profile.qc
 ../share/classes.qc
 ../share/animate.qc
 ../share/mcp_precache.qc						
+../share/engineer.qc
 weapon_predict.qc
 pmove.qc
 tfx.qc

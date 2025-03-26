@@ -50,7 +50,6 @@ entity(float ino) Finditem;
 void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer;
 
 void () CTF_FlagCheck;
-void (entity pl) Sniper_ZoomReset;
 void () StartTimer;
 void () StopTimer;
 void () StartQuadRound;
@@ -1759,8 +1758,6 @@ void () ClientKill = {
         }
     }
 
-    Sniper_ZoomReset(self);
-
     set_suicide_frame();
     self.modelindex = modelindex_player;
 
@@ -2042,7 +2039,6 @@ void (entity p) SetVoteParams = {
     p.th_pain = player_pain;
     p.th_die = PlayerDie;
     p.height = 0;
-    Sniper_ZoomReset(p);
 
     p.deadflag = 0;
     p.pausetime = 0;
@@ -2103,25 +2099,27 @@ void (float all_dimensions) SetDimensions = {
         switch (self.team_no)
         {
             case TEAM_BLUE:
-                self.dimension_see = DMN_NOFLASH | DMN_TEAMBLUE;
+                self.dimension_see = DMN_NOFLASH | DMN_HIDDEN | DMN_TEAMBLUE;
                 break;
             case TEAM_RED:
-                self.dimension_see = DMN_NOFLASH | DMN_TEAMRED;
+                self.dimension_see = DMN_NOFLASH | DMN_HIDDEN | DMN_TEAMRED;
                 break;
             case TEAM_YELL:
-                self.dimension_see = DMN_NOFLASH | DMN_TEAMYELL;
+                self.dimension_see = DMN_NOFLASH | DMN_HIDDEN | DMN_TEAMYELL;
                 break;
             case TEAM_GREN:
-                self.dimension_see = DMN_NOFLASH | DMN_TEAMGREN;
+                self.dimension_see = DMN_NOFLASH | DMN_HIDDEN | DMN_TEAMGREN;
                 break;
             default:
-                self.dimension_see = DMN_NOFLASH;
+                self.dimension_see = DMN_NOFLASH | DMN_HIDDEN;
                 break;
         }
     }
 };
 
 void () PutClientInServer = {
+    UpdateClientPlayerSpawn(self);
+
     if (fo_login_required && self.fo_login == string_null)
         UpdateClient_Login(self);
 
@@ -2274,7 +2272,6 @@ void () PutClientInServer = {
     self.th_pain = player_pain;
     self.th_die = PlayerDie;
     self.height = 0;
-    Sniper_ZoomReset(self);
 
     self.deadflag = 0;
     self.pausetime = 0;
@@ -3872,8 +3869,6 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
 
 void (entity targ, entity attacker) ClientObituary = {
     local string deathstring;
-
-    Sniper_ZoomReset(targ);
 
     if (cb_prematch)
         return;

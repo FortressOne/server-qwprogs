@@ -323,10 +323,10 @@ void (entity pov, string command, string color) UpdateTeamColor = {
     }
 }
 
-float (string arg1, string arg2, string arg3) ParseCmds = {
+float (string arg1, string arg2, string arg3, string arg4) ParseCmds = {
     local float arg_num = 0, processedCmd, inp;
     local string tmp;
-    local float farg2, farg3;
+    local float farg2, farg3, farg4;
     local entity ent, pl;
     processedCmd = FALSE;
 
@@ -518,6 +518,14 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 break;
             }
             if (arg2) {
+                if(arg2 == "next") {
+                    FO_Spy_DisguiseCycle(self, 1);
+                    break;
+                }
+                if(arg2 == "prev") {
+                    FO_Spy_DisguiseCycle(self, -1);
+                    break;
+                }
                 if(arg2 == "last") {
                     Menu_Spy_Input(2);
                     break;
@@ -695,13 +703,14 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 if(arg2 == "cancel") {
                     TeamFortress_EngineerBuildStop();
                     break;
-                }                
+                }
                 if(arg2 == "sentry") {
                     if(self.is_building && !engineer_move) {
                         TeamFortress_EngineerBuildStop();
                         break;
                     }
-                    Menu_Engineer_Input(1);
+
+                    TeamFortress_BuildSentry(stof(arg3));
                     break;
                 }
                 if(arg2 == "dispenser") {
@@ -733,11 +742,12 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 sprint(self, PRINT_HIGH, "Only engineers can do that!\n");
                 break;
             }
+
             if(self.health <= 0) {
                 sprint(self, PRINT_HIGH, "Can't maintain while dead.\n");
                 break;
             }
-            
+
             //find sentry first
             ent = findradius(self.origin, ENG_BUILDING_MAINT_DISTANCE);
             while (ent) {
@@ -747,10 +757,12 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 }
                 ent = ent.chain;
             }
+
             if (!ent) {
                 sprint(self, PRINT_HIGH, "No sentry in range\n");
                 break;
             }
+
             if (arg2 && arg3) {
                 if(arg2 == "rotate") {
                     farg3 = stof(arg3);
@@ -759,13 +771,16 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                         sprint(self, PRINT_HIGH, "Sentry detection issue!\n");
                         break;
                     }
-                    if(farg3 < 0) {
-                        sprint(self, PRINT_HIGH, "Rotating ",ftos(farg3 * -1)," degrees clockwise...\n");
-                    } else {
-                        sprint(self, PRINT_HIGH, "Rotating ",ftos(farg3)," degrees anticlockwise...\n");
+                    ent.angles_y -= farg3;
+                    ent.waitmin = rint(ent.angles_y - 50);
+                    ent.waitmin = anglemod(ent.waitmin);
+                    ent.waitmax = rint(ent.angles_y + 50);
+                    ent.waitmax = anglemod(ent.waitmax);
+                    if (ent.waitmin > ent.waitmax) {
+                        ent.waitmin = ent.waitmax;
+                        ent.waitmax = anglemod(ent.angles_y - 50);
                     }
-                    ent.waitmin = anglemod(ent.waitmin + farg3);
-                    ent.waitmax = anglemod(ent.waitmax + farg3);
+                    ent.nextthink = time + 0.5;
                     break;
                 }
                 sprint(self, PRINT_HIGH, "Invalid choice.\n");
@@ -1304,7 +1319,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 break;
             case "play_to_completion":
                 if(arg2 != "0" && arg2 != "1")
-                    return;
+                    break;
 
                 processedCmd = TRUE;
                 localcmd ("localinfo play_to_completion ",arg2,"\n");
@@ -1379,7 +1394,7 @@ void (string cmd) SV_ParseClientCommand = {
     float isProcessed;
     tokenize(cmd);
 
-    isProcessed = ParseCmds(argv(0), argv(1), argv(2));
+    isProcessed = ParseCmds(argv(0), argv(1), argv(2), argv(3));
 
     if (!isProcessed)
     {

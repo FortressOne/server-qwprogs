@@ -103,6 +103,12 @@ void() CSQC_Parse_Event = {
             last_id_time = time;
             SBAR.Identify = readstring();
             break;
+        case MSG_PLAYER_DIE:
+            zoom_scale = 1;
+            break;
+        case MSG_PLAYER_SPAWN:
+            zoom_scale = 1;
+            break;
         case MSG_GRENPRIMED:
             float entno = readentitynum();
             float grentype = readbyte();
@@ -358,6 +364,9 @@ void() CSQC_Parse_Event = {
         case MSG_FLAG_PICKUP:
             flag_team = readfloat();
             pick_up_time = time;
+            break;
+        case MSG_BUILDING:
+            SentryPreviewStop();
             break;
         case MSG_FLAG_DROP:
             pick_up_time = FALSE;

@@ -30,15 +30,11 @@ void () PipebombTouch;
 
 void () SniperSight_Create;
 
-void (float zoom_to) Sniper_Zoom;
-
 void () Help_Show;
 void () TeamFortress_Inventory;
 void () TeamFortress_SaveMe;
 void (entity pe_player, float f_type) CF_Identify;
 void () TeamFortress_ReloadNext;
-void () Sniper_ZoomToggle;
-void (float zoom_in) Sniper_ZoomAdjust;
 void () TeamFortress_StatusQuery;
 void () CF_Scout_Dash;
 void () CF_Spy_DisguiseStop;
@@ -2547,22 +2543,6 @@ void () W_WeaponFrame = {
             else if (self.impulse == TF_HVYWEAP_LOCK_TOGGLE)
                 FO_LockToggle();
             Status_Refresh(self);
-            self.impulse = 0;
-            return;
-        }
-    }
-
-    if (self.playerclass == PC_SNIPER) {
-        if (self.impulse == TF_SPECIAL_SKILL || self.impulse == TF_ZOOMTOGGLE) {
-            Sniper_ZoomToggle();
-            self.impulse = 0;
-            return;
-        } else if (self.impulse == TF_ZOOMIN || (self.is_zooming && self.impulse == TF_WEAPPREV)) {
-            Sniper_ZoomAdjust(1);
-            self.impulse = 0;
-            return;
-        } else if (self.impulse == TF_ZOOMOUT || (self.is_zooming && self.impulse == TF_WEAPNEXT)) {
-            Sniper_ZoomAdjust(0);
             self.impulse = 0;
             return;
         }

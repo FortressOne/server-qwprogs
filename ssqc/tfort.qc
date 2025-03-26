@@ -48,9 +48,6 @@ void () UseSpecialSkill = {
         case PC_SCOUT:
             self.impulse = TF_DASH;
             break;
-        case PC_SNIPER:
-            self.impulse = TF_ZOOMTOGGLE;
-            break;
         case PC_DEMOMAN:
             self.impulse = TF_PB_DETONATE;
             break;
@@ -1238,7 +1235,7 @@ void () TeamFortress_SetEquipment = {
         stuffcmd(self, st);
         stuffcmd(self, "\n");
     }
-    self.is_building = 0;
+    self.is_building = FALSE;
     self.is_detpacking = 0;
     self.airblast_cooldown = 0;
     self.is_undercover = 0;
@@ -1951,7 +1948,7 @@ void () TeamFortress_RemoveTimers = {
         TeamFortress_EngineerBuildStop();
     }
 
-    self.is_building = 0;
+    self.is_building = FALSE;
     self.building = world;
     if (self.tfstate & TFSTATE_AIMING) {
         self.tfstate &= ~TFSTATE_AIMING;

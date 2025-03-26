@@ -92,6 +92,9 @@ sound files are found in `fortress/sound/hitaudio/` and  `fortress/sound/announc
 * New buttons (not impulses):
 * `+special` Scout: `dash`, Demoman: `detpipe`, Medic: `aura`, Hwguy: `lock`, Pyro: `airblast`, Spy: `+feign`, Engineer: `toggledispenser`.
 * `+special2` Same as `special2`, but also has `+rj` for Soldier and Pyro.
+* `specialup` Engineer: `cmd sentry rotate -15`, Spy: `cmd disguise prev`.
+* `specialdown` Engineer: `cmd sentry rotate 15`, Spy: `cmd disguise next`.
+* `zoomin` and `zoomout` commands that adjust sens with zoom. 5 levels.
 * `setinfo hold_grens` for press and hold `+grenade1` and `+grenade2`
 * `setinfo hold_fiegn` for press and hold feigning
 * `setinfo hold_detpack` for press and hold detpack
